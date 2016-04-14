@@ -108,7 +108,7 @@ void NGLScene::initializeGL()
   (*shader)["Point"]->use();
 
   m_wind=new ngl::Vec3(1,1,1);
-  m_emitter = new Emitter(ngl::Vec3(0,0,0),500000,m_wind);
+  m_emitter = new Emitter(ngl::Vec3(0,0,0),50000,m_wind);
   m_emitter->setCam(m_cam);
   m_emitter->setShaderName("Point");
 
