@@ -179,7 +179,7 @@ void Emitter::exportRib()
   // create an ngl::RibExport this can work either as a one shot
   // exporter or we can get it to output by setting frame numbers
   // see the source code to see how it works.
-  ngl::RibExport rib(fname,true);
+  ngl::RibExport rib(fname);
   // open the rib stream to write (basically a file)
   rib.open();
   // as it is a file we can get a reference to it to write too
@@ -190,7 +190,7 @@ void Emitter::exportRib()
   // raw string literals instead
   ribStream<<"Display \""<<data<<"\" \"file\" \"rgba\"\n";
   // export the display format again this is user selected
-  ribStream<<"Format 720 576 1\n";
+  ribStream<<"Format 1024 720 1\n";
   // projection not we use the ngl::Camera fov
   ribStream<<"Projection \"perspective\" \"uniform float fov\" ["<<m_cam->getFOV()<<"]\n";
   // call world begin (see Rib export as it covers most of rib)
@@ -212,7 +212,7 @@ void Emitter::exportRib()
   ribStream<<"\"varying float width\" [";
   for(int i=0; i<m_numParticles; ++i)
   {
-    ribStream<<"0.05";
+    ribStream<<"0.01";
   }
   ribStream<<"]\n";
   // finally end the world
