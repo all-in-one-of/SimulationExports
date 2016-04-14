@@ -1,5 +1,6 @@
 *.rib
 *.tiff
+output.log
 # Compiled Object files
 *.slo
 *.lo
