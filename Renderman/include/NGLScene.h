@@ -4,7 +4,7 @@
 #include <ngl/Colour.h>
 #include <ngl/Light.h>
 #include <ngl/Text.h>
-#include <QOpenGLWindow.h>
+#include <QOpenGLWindow>
 #include <memory>
 #include "Emitter.h"
 #include <QTime>
