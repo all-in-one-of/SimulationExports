@@ -46,7 +46,7 @@ public :
 	/// @brief ctor
 	/// @param _pos the position of the emitter
 	/// @param _numParticles the number of particles to create
-	Emitter( ngl::Vec3 _pos, int _numParticles, ngl::Vec3 *_wind );
+  Emitter( ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind );
 	/// @brief a method to update each of the particles contained in the system
 	void update();
 	/// @brief a method to draw all the particles contained in the system
@@ -62,7 +62,7 @@ public :
 	/// @brief the position of the emitter
 	ngl::Vec3 m_pos;
 	/// @brief the number of particles
-	int m_numParticles;
+  unsigned int m_numParticles;
 	/// @brief the container for the particles
   std::unique_ptr<Particle []> m_particles;
   std::unique_ptr<GLParticle []> m_glparticles;
@@ -79,7 +79,7 @@ public :
 
   std::unique_ptr <Alembic::AbcGeom::OArchive> m_archive;
   //Alembic::AbcGeom::OPointsSchema pSchema;
-  std::unique_ptr <Alembic::AbcGeom::OPoints> partsOut;
+  std::unique_ptr <Alembic::AbcGeom::OPoints> m_partsOut;
 };
 
 

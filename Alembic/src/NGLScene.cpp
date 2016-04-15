@@ -34,7 +34,6 @@ NGLScene::NGLScene(unsigned int _numParticles)
   m_numParticles=_numParticles;
   ngl::Logger *log = ngl::Logger::instance();
   log->logMessage("Testing the logger");
-
 }
 
 
@@ -89,22 +88,26 @@ void NGLScene::initializeGL()
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
+  constexpr auto Point="Point";
+  constexpr auto PointVertex="PointVertex";
+  constexpr auto PointFragment="PointFragment";
+
   // we are creating a shader called Phong
-  shader->createShaderProgram("Point");
+  shader->createShaderProgram(Point);
   // now we are going to create empty shaders for Frag and Vert
-  shader->attachShader("PointVertex",ngl::ShaderType::VERTEX);
-  shader->attachShader("PointFragment",ngl::ShaderType::FRAGMENT);
+  shader->attachShader(PointVertex,ngl::ShaderType::VERTEX);
+  shader->attachShader(PointFragment,ngl::ShaderType::FRAGMENT);
   // attach the source
-  shader->loadShaderSource("PointVertex","shaders/PointVertex.glsl");
-  shader->loadShaderSource("PointFragment","shaders/PointFragment.glsl");
+  shader->loadShaderSource(PointVertex,"shaders/PointVertex.glsl");
+  shader->loadShaderSource(PointFragment,"shaders/PointFragment.glsl");
   // compile the shaders
-  shader->compileShader("PointVertex");
-  shader->compileShader("PointFragment");
+  shader->compileShader(PointVertex);
+  shader->compileShader(PointFragment);
   // add them to the program
-  shader->attachShaderToProgram("Point","PointVertex");
-  shader->attachShaderToProgram("Point","PointFragment");
+  shader->attachShaderToProgram(Point,PointVertex);
+  shader->attachShaderToProgram(Point,PointFragment);
   // now we have associated this data we can link the shader
-  shader->linkProgramObject("Point");
+  shader->linkProgramObject(Point);
   // and make it active ready to load values
   (*shader)["Point"]->use();
 
@@ -171,8 +174,8 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
   {
     int diffx=_event->x()-m_origX;
     int diffy=_event->y()-m_origY;
-    m_spinXFace += (float) 0.5f * diffy;
-    m_spinYFace += (float) 0.5f * diffx;
+    m_spinXFace += static_cast<int>( 0.5f * diffy);
+    m_spinYFace += static_cast<int>(0.5f * diffx);
     m_origX = _event->x();
     m_origY = _event->y();
     update();
@@ -181,8 +184,8 @@ void NGLScene::mouseMoveEvent (QMouseEvent * _event)
         // right mouse translate code
   else if(m_translate && _event->buttons() == Qt::RightButton)
   {
-    int diffX = (int)(_event->x() - m_origXPos);
-    int diffY = (int)(_event->y() - m_origYPos);
+    int diffX = static_cast<int>(_event->x() - m_origXPos);
+    int diffY = static_cast<int>(_event->y() - m_origYPos);
     m_origXPos=_event->x();
     m_origYPos=_event->y();
     m_modelPos.m_x += INCREMENT * diffX;
@@ -255,17 +258,17 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   {
   // escape key to quite
   case Qt::Key_Escape : QGuiApplication::exit(EXIT_SUCCESS); break;
-    case Qt::Key_Up : m_wind.m_y+=0.1f; break;
-    case Qt::Key_Down : m_wind.m_y-=0.1f; break;
-    case Qt::Key_Left : m_wind.m_x+=0.1f; break;
-    case Qt::Key_Right : m_wind.m_x-=0.1f; break;
+  case Qt::Key_Up : m_wind.m_y+=0.1f; break;
+  case Qt::Key_Down : m_wind.m_y-=0.1f; break;
+  case Qt::Key_Left : m_wind.m_x+=0.1f; break;
+  case Qt::Key_Right : m_wind.m_x-=0.1f; break;
 
-    case Qt::Key_I : m_wind.m_z+=0.1f; break;
-    case Qt::Key_O : m_wind.m_z-=0.1f; break;
-    case Qt::Key_1 : m_emitter->decTime(0.1f); break;
-    case Qt::Key_2 : m_emitter->incTime(0.1f); break;
-    case Qt::Key_E : m_emitter->toggleExport(); break;
-    case Qt::Key_Space : m_wind.set(1,1,1); break;
+  case Qt::Key_I : m_wind.m_z+=0.1f; break;
+  case Qt::Key_O : m_wind.m_z-=0.1f; break;
+  case Qt::Key_1 : m_emitter->decTime(0.1f); break;
+  case Qt::Key_2 : m_emitter->incTime(0.1f); break;
+  case Qt::Key_E : m_emitter->toggleExport(); break;
+  case Qt::Key_Space : m_wind.set(1,1,1); break;
   default : break;
   }
   //update();

@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   format.setDepthBufferSize(24);
   // now we are going to create our scene window
   unsigned int numParticles=50000;
-  if(argc>2)
+  if(argc>1)
     numParticles=atoi(argv[1]);
   NGLScene window(numParticles);
   // and set the OpenGL format
