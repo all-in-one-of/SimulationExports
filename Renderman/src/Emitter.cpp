@@ -23,11 +23,11 @@ Emitter::Emitter(ngl::Vec3 _pos, int _numParticles, ngl::Vec3 *_wind )
 	QElapsedTimer timer;
 	timer.start();
 	m_pos=_pos;
-	m_particles = new Particle[_numParticles];
-	m_glparticles = new GLParticle[_numParticles];
+  m_particles.reset(  new Particle[_numParticles]);
+  m_glparticles.reset( new GLParticle[_numParticles]);
 	m_vao=ngl::VertexArrayObject::createVOA(GL_POINTS);
-  float pointOnCircleX= cos(ngl::radians(m_time))*4.0;
-  float pointOnCircleZ= sin(ngl::radians(m_time))*4.0;
+  float pointOnCircleX= cosf(ngl::radians(m_time))*4.0f;
+  float pointOnCircleZ= sinf(ngl::radians(m_time))*4.0f;
   ngl::Vec3 end(pointOnCircleX,2.0,pointOnCircleZ);
   end=end-m_pos;
 
@@ -64,8 +64,6 @@ log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed())
 
 Emitter::~Emitter()
 {
-	delete [] m_glparticles;
-	delete [] m_particles;
 	m_vao->removeVOA();
 }
 

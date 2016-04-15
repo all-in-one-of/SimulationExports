@@ -1,10 +1,11 @@
-#ifndef NGLSCENE_H__
-#define NGLSCENE_H__
+#ifndef NGLSCENE_H_
+#define NGLSCENE_H_
 #include <ngl/Camera.h>
 #include <ngl/Colour.h>
 #include <ngl/Light.h>
 #include <ngl/Text.h>
 #include <QOpenGLWindow.h>
+#include <memory>
 #include "Emitter.h"
 #include <QTime>
 
@@ -28,7 +29,7 @@ class NGLScene : public QOpenGLWindow
     /// @brief ctor for our NGL drawing class
     /// @param [in] parent the parent window to the class
     //----------------------------------------------------------------------------------------------------------------------
-    NGLScene();
+    NGLScene(unsigned int _numParticles);
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief dtor must close down ngl and release OpenGL resources
     //----------------------------------------------------------------------------------------------------------------------
@@ -81,7 +82,7 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief Our Camera
     //----------------------------------------------------------------------------------------------------------------------
-    ngl::Camera *m_cam;
+    ngl::Camera m_cam;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief the model position for mouse movement
     //----------------------------------------------------------------------------------------------------------------------
@@ -89,12 +90,12 @@ private:
     /// @brief flag for the fps timer
     int m_fpsTimer;
     /// @brief the fps to draw
-    Emitter *m_emitter;
+    std::unique_ptr<Emitter> m_emitter;
     /// @brief the particle update timer
     int m_particleTimer;
     /// @brief a wind vector
-    ngl::Vec3 *m_wind;
-    ngl::Text *m_text;
+    ngl::Vec3 m_wind;
+    std::unique_ptr <ngl::Text> m_text;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief flag for the fps timer
     //----------------------------------------------------------------------------------------------------------------------
@@ -110,6 +111,7 @@ private:
     /// @brief timer for re-draw
     //----------------------------------------------------------------------------------------------------------------------
     QTime m_timer;
+    unsigned int m_numParticles;
 
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief method to load transform matrices to the shader

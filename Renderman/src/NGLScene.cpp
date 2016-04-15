@@ -19,7 +19,7 @@ constexpr float INCREMENT=0.01f;
 //----------------------------------------------------------------------------------------------------------------------
 constexpr float ZOOM=0.1f;
 
-NGLScene::NGLScene()
+NGLScene::NGLScene(unsigned int _numParticles)
 {
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
   m_rotate=false;
@@ -31,6 +31,7 @@ NGLScene::NGLScene()
   m_fps=0;
   m_frames=0;
   m_timer.start();
+  m_numParticles=_numParticles;
   ngl::Logger *log = ngl::Logger::instance();
   log->logMessage("Testing the logger");
 
@@ -39,7 +40,6 @@ NGLScene::NGLScene()
 
 NGLScene::~NGLScene()
 {
-  delete m_emitter;
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
   ngl::Logger *log = ngl::Logger::instance();
   log->close();
@@ -47,20 +47,21 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL(QResizeEvent *_event )
 {
-  if(isExposed())
-  {
   int w=_event->size().width();
   int h=_event->size().height();
   // set the viewport for openGL
   glViewport(0,0,w,h);
   // now set the camera size values as the screen size has changed
-  m_cam->setShape(45.0f,static_cast<float>(w)/h,0.05f,350.0f);
-  update();
-  }
+  m_cam.setShape(45.0f,static_cast<float>(w)/h,0.05f,350.0f);
+
 }
 
 void NGLScene::resizeGL(int _w, int _h)
 {
+  // set the viewport for openGL
+  glViewport(0,0,_w,_h);
+  // now set the camera size values as the screen size has changed
+  m_cam.setShape(45.0f,static_cast<float>(_w)/_h,0.05f,350.0f);
 
 }
 
@@ -81,10 +82,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,5,18);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam= new ngl::Camera(from,to,up);
+  m_cam.set(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam->setShape(40.0f,720.0f/576.0f,0.5f,150.0f);
+  m_cam.setShape(40.0f,720.0f/576.0f,0.5f,150.0f);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -107,18 +108,16 @@ void NGLScene::initializeGL()
   // and make it active ready to load values
   (*shader)["Point"]->use();
 
-  m_wind=new ngl::Vec3(1,1,1);
-  m_emitter = new Emitter(ngl::Vec3(0,0,0),50000,m_wind);
-  m_emitter->setCam(m_cam);
+  m_wind.set(1,1,1);
+  m_emitter.reset( new Emitter(ngl::Vec3(0,0,0),m_numParticles,&m_wind));
+  m_emitter->setCam(&m_cam);
   m_emitter->setShaderName("Point");
 
-  m_text=new ngl::Text(QFont("Arial",14));
+  m_text.reset(new ngl::Text(QFont("Arial",14)));
   m_text->setScreenSize(width(),height());
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
   m_particleTimer=startTimer(20);
-  m_text = new ngl::Text(QFont("Arial",14));
-  m_text->setScreenSize(width(),height());
 
 }
 
@@ -148,12 +147,12 @@ void NGLScene::paintGL()
 
   m_emitter->draw(mouseGlobalTX);
   m_text->setColour(1,1,1);
-  QString text=QString("Wind Vector  %1 %2 %3").arg(m_wind->m_x).arg(m_wind->m_y).arg(m_wind->m_z);
+  QString text=QString("Wind Vector  %1 %2 %3").arg(m_wind.m_x).arg(m_wind.m_y).arg(m_wind.m_z);
   m_text->renderText(10,20,text);
   ++m_frames;
  // glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
   m_text->setColour(1,1,0);
-  text=QString("%1 fps").arg(m_fps);
+  text=QString("Total Particles %1 %2 fps").arg(m_numParticles).arg(m_fps);
   m_text->renderText(10,40,text);
   //glPointSize(1.0);
   glEnable(GL_PROGRAM_POINT_SIZE);
@@ -256,22 +255,20 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   {
   // escape key to quite
   case Qt::Key_Escape : QGuiApplication::exit(EXIT_SUCCESS); break;
-    case Qt::Key_Up : m_wind->m_y+=0.1; break;
-    case Qt::Key_Down : m_wind->m_y-=0.1; break;
-    case Qt::Key_Left : m_wind->m_x+=0.1; break;
-    case Qt::Key_Right : m_wind->m_x-=0.1; break;
+    case Qt::Key_Up : m_wind.m_y+=0.1f; break;
+    case Qt::Key_Down : m_wind.m_y-=0.1f; break;
+    case Qt::Key_Left : m_wind.m_x+=0.1f; break;
+    case Qt::Key_Right : m_wind.m_x-=0.1f; break;
 
-		case Qt::Key_I : m_wind->m_z+=0.1; break;
-		case Qt::Key_O : m_wind->m_z-=0.1; break;
-    case Qt::Key_1 : m_emitter->decTime(0.1); break;
-    case Qt::Key_2 : m_emitter->incTime(0.1); break;
+    case Qt::Key_I : m_wind.m_z+=0.1f; break;
+    case Qt::Key_O : m_wind.m_z-=0.1f; break;
+    case Qt::Key_1 : m_emitter->decTime(0.1f); break;
+    case Qt::Key_2 : m_emitter->incTime(0.1f); break;
     case Qt::Key_E : m_emitter->toggleExport(); break;
-    case Qt::Key_Space : m_wind->set(1,1,1); break;
+    case Qt::Key_Space : m_wind.set(1,1,1); break;
   default : break;
   }
-  // finally update the GLWindow and re-draw
-  //if (isExposed())
-    update();
+  //update();
 }
 
 void NGLScene::timerEvent(QTimerEvent *_event )

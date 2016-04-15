@@ -4,19 +4,16 @@
 #include <ngl/Camera.h>
 #include <ngl/Vec3.h>
 #include <ngl/VertexArrayObject.h>
+#include <memory>
 #pragma pack(push,1)
 
 typedef struct Particle
 {
-
 	/// @brief the curent particle position
-	//ngl::Vec3 m_pos;
 	GLfloat m_px;
 	GLfloat m_py;
 	GLfloat m_pz;
-
 	/// @brief the direction vector of the particle
-	//ngl::Vec3 m_dir;
 	GLfloat m_dx;
 	GLfloat m_dy;
 	GLfloat m_dz;
@@ -31,12 +28,7 @@ typedef struct GLParticle
 	GLfloat px;
 	GLfloat py;
 	GLfloat pz;
-//	GLfloat dx;
-//	GLfloat dy;
-//	GLfloat dz;
 }GLParticle;
-
-
 
 #pragma pack(pop)
 
@@ -58,7 +50,6 @@ public :
 	void draw(const ngl::Mat4 &_rot);
 	~Emitter();
   void setCam(ngl::Camera *_cam){m_cam=_cam;}
-  ngl::Camera * getCam()const {return m_cam;}
   void setShaderName(const std::string &_n){m_shaderName=_n;}
   const std::string getShaderName()const {return m_shaderName;}
   void incTime(float _t){m_time+=_t;}
@@ -70,8 +61,8 @@ public :
 	/// @brief the number of particles
 	int m_numParticles;
 	/// @brief the container for the particles
-	Particle *m_particles;
-	GLParticle *m_glparticles;
+  std::unique_ptr<Particle []> m_particles;
+  std::unique_ptr<GLParticle []> m_glparticles;
 	/// @brief a wind vector
 	ngl::Vec3 *m_wind;
   /// @brief the name of the shader to use
@@ -79,7 +70,7 @@ public :
   /// @brief a pointer to the camera used for drawing
   ngl::Camera *m_cam;
   ngl::VertexArrayObject *m_vao;
-  float m_time=0.8;
+  float m_time=0.8f;
   bool m_export=false;
   void exportRib();
 
