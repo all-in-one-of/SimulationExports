@@ -1,6 +1,7 @@
 *.rib
 *.tiff
 output.log
+*.abc
 # Compiled Object files
 *.slo
 *.lo
