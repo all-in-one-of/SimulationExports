@@ -64,7 +64,9 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   /// @note this demo is based on alembic/lib/Alembic/AbcGeom/Tests/PointsTest.cpp
 
   // create an alembic Geometry output archive called particlesOut.abc
+
   m_archive.reset(new  AbcG::OArchive(Alembic::AbcCoreOgawa::WriteArchive(),"particlesOut.abc") );
+
   // create time sampling of 24 fps at frame 0 to start
   AbcG::TimeSampling ts(1.0f/24.0f, 0.0f);
   // get the archive top
@@ -74,7 +76,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   // this is our particle outputs to write to each frame
   m_partsOut.reset( new AbcG::OPoints(topObj, "simpleParticles", tsidx) );
   // now add a colour property to the alembic file for out points
-  m_rgbOut.reset(new AbcG::OC3fArrayProperty( m_partsOut->getSchema(), "Cs", tsidx ));
+  m_rgbOut.reset(new AbcG::OC4fArrayProperty( m_partsOut->getSchema(), ".colour",false,AbcG::kVertexScope, tsidx ));
 }
 
 
@@ -195,15 +197,15 @@ void Emitter::exportFrame()
   // set this to push back into the array
   Imath::V3f data;
   // colour values
-  Imath::C3f c;
-  std::vector<Imath::C3f> colours;
+  Imath::C4f c;
+  std::vector<Imath::C4f> colours;
 
 
   for(unsigned int  i=0; i<m_numParticles; ++i)
   {
     positions.push_back(Imath::V3f(m_particles[i].m_px,m_particles[i].m_py,m_particles[i].m_pz));
     id.push_back(i);
-    colours.push_back(Imath::C3f(m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b));
+    colours.push_back(Imath::C4f(m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b,1.0f));
   }
   // create as samples we need to do this else we get a most vexing parse
   // https://en.wikipedia.org/wiki/Most_vexing_parse using below
@@ -213,7 +215,7 @@ void Emitter::exportFrame()
   AbcG::OPointsSchema::Sample psamp( pos,ids );
 
   m_partsOut->getSchema().set( psamp );
-  AbcG::C3fArraySample colourArray(colours);
+  AbcG::C4fArraySample colourArray(colours);
   m_rgbOut->set(colourArray);
 
 }

@@ -87,7 +87,7 @@ public :
 
   std::unique_ptr <Alembic::AbcGeom::OArchive> m_archive;
   std::unique_ptr <Alembic::AbcGeom::OPoints> m_partsOut;
-  std::unique_ptr <Alembic::AbcGeom::OC3fArrayProperty> m_rgbOut;
+  std::unique_ptr <Alembic::AbcGeom::OC4fArrayProperty> m_rgbOut;
 
 };
 
