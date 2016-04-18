@@ -39,6 +39,11 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
     g.px=p.m_px=m_pos.m_x;
     g.py=p.m_py=m_pos.m_y;
     g.pz=p.m_pz=m_pos.m_z;
+    ngl::Colour c=rand->getRandomColour();
+    p.m_r=g.pr=c.m_r;
+    p.m_g=g.pg=c.m_g;
+    p.m_b=g.pb=c.m_b;
+
     p.m_dx=end.m_x+rand->randomNumber(2)+0.5f;
     p.m_dy=end.m_y+rand->randomPositiveNumber(10)+0.5f;
     p.m_dz=end.m_z+rand->randomNumber(2)+0.5f;
@@ -52,8 +57,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   // create the VAO and stuff data
   m_vao->setData(m_numParticles*sizeof(GLParticle),m_glparticles[0].px);
   m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(GLParticle),0);
-  // uv same as above but starts at 0 and is attrib 1 and only u,v so 2
-  //m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(GLParticle),3);
+  m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(GLParticle),3);
   m_vao->setNumIndices(m_numParticles);
   m_vao->unbind();
   log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
@@ -69,7 +73,8 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   Alembic::Util::uint32_t tsidx = topObj.getArchive().addTimeSampling(ts);
   // this is our particle outputs to write to each frame
   m_partsOut.reset( new AbcG::OPoints(topObj, "simpleParticles", tsidx) );
-
+  // now add a colour property to the alembic file for out points
+  m_rgbOut.reset(new AbcG::OC3fArrayProperty( m_partsOut->getSchema(), "Cs", tsidx ));
 }
 
 
@@ -130,10 +135,17 @@ void Emitter::update()
       glPtr[glIndex]=m_particles[i].m_px;
       glPtr[glIndex+1]=m_particles[i].m_py;
       glPtr[glIndex+2]=m_particles[i].m_pz;
+      ngl::Colour c=rand->getRandomColour();
+      glPtr[glIndex+3]=c.m_r;
+      glPtr[glIndex+4]=c.m_g;
+      glPtr[glIndex+5]=c.m_b;
+      m_particles[i].m_r=c.m_r;
+      m_particles[i].m_g=c.m_g;
+      m_particles[i].m_b=c.m_b;
 
     }
     #pragma omp atomic
-    glIndex+=3;
+    glIndex+=6;
 
   }
   m_vao->freeDataPointer();
@@ -182,14 +194,16 @@ void Emitter::exportFrame()
   std::vector<Alembic::Util::uint64_t> id;
   // set this to push back into the array
   Imath::V3f data;
+  // colour values
+  Imath::C3f c;
+  std::vector<Imath::C3f> colours;
+
 
   for(unsigned int  i=0; i<m_numParticles; ++i)
   {
-    data.x=m_particles[i].m_px;
-    data.y=m_particles[i].m_py;
-    data.z=m_particles[i].m_pz;
-    positions.push_back(data);
+    positions.push_back(Imath::V3f(m_particles[i].m_px,m_particles[i].m_py,m_particles[i].m_pz));
     id.push_back(i);
+    colours.push_back(Imath::C3f(m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b));
   }
   // create as samples we need to do this else we get a most vexing parse
   // https://en.wikipedia.org/wiki/Most_vexing_parse using below
@@ -197,6 +211,9 @@ void Emitter::exportFrame()
   AbcG::V3fArraySample pos(positions);
   AbcG::UInt64ArraySample ids(id);
   AbcG::OPointsSchema::Sample psamp( pos,ids );
-  // write the schema for the frame
+
   m_partsOut->getSchema().set( psamp );
+  AbcG::C3fArraySample colourArray(colours);
+  m_rgbOut->set(colourArray);
+
 }

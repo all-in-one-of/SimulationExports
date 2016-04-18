@@ -24,6 +24,10 @@ typedef struct Particle
 	GLfloat m_currentLife;
 	/// @brief gravity
 	GLfloat m_gravity;
+  GLfloat m_r;
+  GLfloat m_g;
+  GLfloat m_b;
+
 }Particle;
 
 typedef struct GLParticle
@@ -31,6 +35,10 @@ typedef struct GLParticle
 	GLfloat px;
 	GLfloat py;
 	GLfloat pz;
+  GLfloat pr;
+  GLfloat pg;
+  GLfloat pb;
+
 }GLParticle;
 
 #pragma pack(pop)
@@ -74,12 +82,13 @@ public :
   ngl::Camera *m_cam;
   ngl::VertexArrayObject *m_vao;
   float m_time=0.8f;
-  bool m_export=true;
+  bool m_export=false;
   void exportFrame();
 
   std::unique_ptr <Alembic::AbcGeom::OArchive> m_archive;
-  //Alembic::AbcGeom::OPointsSchema pSchema;
   std::unique_ptr <Alembic::AbcGeom::OPoints> m_partsOut;
+  std::unique_ptr <Alembic::AbcGeom::OC3fArrayProperty> m_rgbOut;
+
 };
 
 
