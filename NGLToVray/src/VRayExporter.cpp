@@ -1,0 +1,263 @@
+#include "VRayExporter.h"
+#include <iostream>
+#include <ngl/Mat3.h>
+#include <ngl/Vec3.h>
+#include <ngl/Obj.h>
+#include <ngl/NGLStream.h>
+VRayExporter::VRayExporter(const std::string &_fname)
+{
+  open(_fname);
+}
+
+VRayExporter::~VRayExporter()
+{
+  if(m_isOpen ==true)
+    close();
+}
+
+void VRayExporter::close()
+{
+  m_stream.close();
+}
+
+void VRayExporter::open(const std::string &_fname)
+{
+  m_stream.open(_fname.c_str(),std::ios::out);
+  if (!m_stream.is_open())
+  {
+    std::cerr<<"problems Opening File\n";
+  }
+  m_stream<<"// scene file generated using ngl VRayExporter\n";
+
+  m_isOpen=true;
+}
+
+
+void VRayExporter::mat4ToVrayTransform(const ngl::Mat4 &_m)
+{
+  ngl::Mat4 m=_m;
+
+  m_stream<<"transform=Transform(Matrix(";
+  m_stream<<"Vector("<<m.m_00<<","<<m.m_10<<","<<m.m_20<<"),\n";
+  m_stream<<"Vector("<<m.m_01<<","<<m.m_11<<","<<m.m_21<<"),\n";
+  m_stream<<"Vector("<<m.m_02<<","<<m.m_12<<","<<m.m_22<<")),\n";
+  m_stream<<"Vector("<<m.m_30<<","<<m.m_31<<","<<-m.m_32<<"));\n";
+  std::cout<<m<<"\n";
+}
+
+
+
+
+void VRayExporter::renderView(const ngl::Mat4 &_tx)
+{
+  ngl::Mat3 t(_tx);
+  t.inverse();
+  ngl::Vec3 d(_tx.m_30,_tx.m_31,_tx.m_32);
+  ngl::Vec3 pos=-d*_tx;
+  m_stream<<"RenderView renderView {\n";
+  m_stream<<"transform=Transform(Matrix(";
+  m_stream<<"Vector("<<t.m_00<<","<<t.m_10<<","<<t.m_20<<"),\n";
+  m_stream<<"Vector("<<t.m_01<<","<<t.m_11<<","<<t.m_21<<"),\n";
+  m_stream<<"Vector("<<t.m_02<<","<<t.m_12<<","<<t.m_22<<")),\n";
+ // m_stream<<"Vector("<<_tx.m_30<<","<<_tx.m_31<<","<<-_tx.m_32<<"));\n";
+  m_stream<<"Vector("<<-pos.m_x<<","<<-pos.m_y<<","<<pos.m_z<<"));\n";
+
+  m_stream<<"}\n";
+  std::cout<<"view\n"<<_tx<<"\n";
+  std::cout<<"view\n"<<t<<"\n";
+  std::cout<<"pos "<<pos<<"\n";
+}
+
+void VRayExporter::setWorldUp(const ngl::Vec3 &_up)
+{
+  m_stream<<"SettingsUnitsInfo vraySettingsUnitsInfo {\n";
+   m_stream<<"scene_upDir=";
+   writeVector(_up);
+   m_stream<<";\n}\n";
+}
+
+void VRayExporter::setImageSize(int _w, int _h)
+{
+  m_stream<<"SettingsOutput {\n";
+  m_stream<<"img_width="<<_w<<";\n";
+  m_stream<<"img_height="<<_h<<";\n}\n";
+}
+
+void VRayExporter::setFOV(float _fov)
+{
+// Camera settings
+m_stream<<"SettingsCamera {\n";
+m_stream<<"fov="<<_fov<<";\n}\n";
+}
+
+void VRayExporter::setBGColour(float _r,float _g, float _b)
+{
+ m_stream<<"SettingsEnvironment {\n";
+ m_stream<<"bg_color=Color("<<_r<<","<< _g<<","<<_b<<");\n}\n";
+}
+
+void VRayExporter::writeVector(const ngl::Vec3 &_v)
+{
+  m_stream<<"Vector("<<_v.m_x<<","<<_v.m_y<<","<<_v.m_z<<")";
+}
+
+void VRayExporter::writeStaticMesh(const std::string &_name,
+                     const std::vector<ngl::Vec3> &_verts,
+                     const std::vector<ngl::Vec3> &_faces,
+                     const std::vector<ngl::Vec3> &_normals,
+                     const std::vector<ngl::Vec3> &_faceNormals)
+{
+  m_stream<<"GeomStaticMesh "<<_name <<"{\n";
+  m_stream<<"vertices=ListVector(\n";
+  for(auto v : _verts)
+  {
+    writeVector(v);
+    m_stream<<",";
+  }
+  m_stream<<");\n";
+  m_stream<<"faces=ListVector(\n";
+  for(auto f : _faces)
+  {
+    writeVector(f);
+    m_stream<<",";
+  }
+  m_stream<<");\n";
+
+  m_stream<<"normals=ListVector(\n";
+  for(auto n : _normals)
+  {
+    writeVector(n);
+    m_stream<<",";
+  }
+  m_stream<<");\n";
+
+  m_stream<<"faceNormals=ListVector(\n";
+  for(auto n : _faceNormals)
+  {
+    writeVector(n);
+    m_stream<<",";
+  }
+  m_stream<<");\n";
+  m_stream<<"map_channels=List(\n);\n";
+  m_stream<<"}\n";
+}
+
+void VRayExporter::writeStaticMeshWithChannel(const std::string &_name,
+                     const std::vector<ngl::Vec3> &_verts,
+                     const std::vector<ngl::Vec3> &_faces,
+                     const std::vector<ngl::Vec3> &_normals,
+                     const std::vector<ngl::Vec3> &_faceNormals,
+                    const std::vector<ngl::Vec3> &_chan,
+                    const std::vector<ngl::Vec3> &_chanIndex )
+
+{
+  m_stream<<"GeomStaticMesh "<<_name <<"{\n";
+  m_stream<<"vertices=ListVector(\n";
+  for(auto v : _verts)
+  {
+    writeVector(v);
+    m_stream<<",\n";
+  }
+  m_stream<<");\n";
+  m_stream<<"faces=ListVector(\n";
+  for(auto f : _faces)
+  {
+    writeVector(f);
+    m_stream<<",\n";
+  }
+  m_stream<<");\n";
+
+  m_stream<<"normals=ListVector(\n";
+  for(auto n : _normals)
+  {
+    writeVector(n);
+    m_stream<<",\n";
+  }
+  m_stream<<");\n";
+
+  m_stream<<"faceNormals=ListVector(\n";
+  for(auto n : _faceNormals)
+  {
+    writeVector(n);
+    m_stream<<",\n";
+  }
+  m_stream<<");\n";
+  m_stream<<"map_channels=List(\nList(1,\nList(\n";
+  for(auto n : _chan)
+  {
+    writeVector(n);
+    m_stream<<",";
+  }
+  // get rid of last ,
+  long pos = m_stream.tellp();
+  m_stream.seekp (pos-1);
+  m_stream<<"),\nList(\n";
+  for(auto n : _chanIndex)
+  {
+    writeVector(n);
+    m_stream<<",";
+  }
+  // get rid of last ,
+  pos = m_stream.tellp();
+  m_stream.seekp (pos-1);
+  m_stream<<")));";
+  m_stream<<"}\n";
+}
+
+void VRayExporter::writeNode(
+               const std::string &_nodeName,
+               const std::string &_geoName,
+               const std::string &_materialName,
+               const ngl::Mat4 &_tx)
+{
+  m_stream<<"Node "<<_nodeName<<"{\n";
+  m_stream<<"geometry="<<_geoName<<";\n";
+  m_stream<<"material="<<_materialName<<";\n";
+  mat4ToVrayTransform(_tx);
+  m_stream<<"}\n";
+}
+
+void VRayExporter::writeRawDataToStream(const std::string &_d)
+{
+  m_stream<<_d;
+}
+
+void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile)
+{
+  std::vector<ngl::Vec3> verts;
+  std::vector<ngl::Vec3> vertIndex;
+  std::vector<ngl::Vec3> normals;
+  std::vector<ngl::Vec3> faceNormals;
+  std::vector<ngl::Vec3> uv;
+  std::vector<ngl::Vec3> uvIndex;
+  ngl::Obj mesh(_objFile,false);
+
+// get the obj data so we can process it locally
+  std::vector <ngl::Vec3> overts=mesh.getVertexList();
+  std::vector <ngl::Face> ofaces=mesh.getFaceList();
+  std::vector <ngl::Vec3> onormals=mesh.getNormalList();
+  std::vector <ngl::Vec3> ouv=mesh.getTextureCordList();
+
+  int vIndex=0;
+
+  // loop for each of the faces
+  for(auto f : ofaces)
+  {
+    // now for each triangle in the face (remember we ensured tri above)
+    for(unsigned int j=0;j<3;++j)
+    {
+      verts.push_back(overts[f.m_vert[j]]);
+      normals.push_back(onormals[f.m_norm[j]]);
+      uv.push_back(ouv[f.m_tex[j]]);
+    }
+    vertIndex.push_back(ngl::Vec3(vIndex,vIndex+1,vIndex+2));
+    //faceNormals.push_back(ngl::Vec3(vIndex,vIndex+1,vIndex+2));
+    //uvIndex.push_back(ngl::Vec3(vIndex,vIndex+1,vIndex+2));
+    vIndex+=3;
+  }
+
+ // writeStaticMesh(_name,verts,vertIndex,normals,vertIndex);
+
+  writeStaticMeshWithChannel(_name,verts,vertIndex,normals,vertIndex,uv,vertIndex);
+}
+

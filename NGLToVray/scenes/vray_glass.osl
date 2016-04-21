@@ -1,0 +1,8 @@
+surface
+vray_glass
+(
+    float eta = 1.44
+)
+{
+    Ci = reflection(N, eta) + refraction(N, eta, "auto", 1);
+}

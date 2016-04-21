@@ -1,5 +1,8 @@
 *.rib
 *.tiff
+*.png
+*.vrscene
+VRayExport
 output.log
 *.abc
 # Compiled Object files

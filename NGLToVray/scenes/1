@@ -1,0 +1,80 @@
+[2016/Apr/21|20:03:04] Reading configuration from "/Users/jmacey/vraystd/bin/mavericks_x64/gcc-4.2//vrayconfig.xml"
+[2016/Apr/21|20:03:04] ===============================================
+[2016/Apr/21|20:03:04] V-Ray Standalone DEMO, version 3.20.03 for x64
+[2016/Apr/21|20:03:04] Copyright (C) 2000-2015 Chaos Group Ltd. All rights reserved.
+[2016/Apr/21|20:03:04] Use -credits option for additional third-party copyright notices.
+[2016/Apr/21|20:03:04] 
+[2016/Apr/21|20:03:04] Build 216ecce60b30 from Aug 27 2015, 16:00:24
+[2016/Apr/21|20:03:04] Compiled with GCC-compatible compiler, version 4.2
+[2016/Apr/21|20:03:04] Operating system is Mac OS X
+[2016/Apr/21|20:03:04] 
+[2016/Apr/21|20:03:04] V-Ray core version is 3.20.03
+[2016/Apr/21|20:03:04] ===============================================
+[2016/Apr/21|20:03:04] 
+[2016/Apr/21|20:03:04] Loading plugins from "/Users/jmacey/vraystd/bin/mavericks_x64/gcc-4.2/plugins/libvray_*.so"
+[2016/Apr/21|20:03:04] warning: Getting library description failed because:
+[2016/Apr/21|20:03:04] warning:   dlsym(0x10118d930, getLibDesc): symbol not found
+[2016/Apr/21|20:03:04] 157 plugin(s) loaded successfully
+[2016/Apr/21|20:03:04] Finished loading plugins.
+[2016/Apr/21|20:03:04] Reading scene file "/Users/jmacey/NGL6Demos/SimulationExports/NGLToVray/scenes/cube.000.vrscene"
+[2016/Apr/21|20:03:04] /Users/jmacey/NGL6Demos/SimulationExports/NGLToVray/scenes/cube.000.vrscene: 75.81% [ 0h  0m  0.2s] [ 0h  0m  0.1s est][2016/Apr/21|20:03:04] /Users/jmacey/NGL6Demos/SimulationExports/NGLToVray/scenes/cube.000.vrscene: done [ 0h  0m  0.3s]
+[2016/Apr/21|20:03:04] Scene file parsed successfully in 0.3 s.
+[2016/Apr/21|20:03:04] Scene created successfully.
+[2016/Apr/21|20:03:04] Objects in scene: 19
+[2016/Apr/21|20:03:04] Starting render sequence.
+[2016/Apr/21|20:03:04] Preparing renderer...
+[2016/Apr/21|20:03:04] Creating bitmap manager
+[2016/Apr/21|20:03:04] Preparing scene for rendering...: done [ 0h  0m  0.0s]
+[2016/Apr/21|20:03:04] 1 lights found.
+[2016/Apr/21|20:03:05] ========================
+[2016/Apr/21|20:03:05] Starting frame 0.
+[2016/Apr/21|20:03:05] Preparing scene for frame...:  0.00% [ 0h  0m  0.4s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:05] Preparing scene for frame...: done [ 0h  0m  0.0s]
+[2016/Apr/21|20:03:05] Compiling geometry...:  0.00% [ 0h  0m  0.4s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:05] Compiling geometry...: done [ 0h  0m  0.0s]
+[2016/Apr/21|20:03:05] Building static raycast accelerator...:  0.00% [ 0h  0m  0.4s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:05] Building static raycast accelerator...: done [ 0h  0m  0.0s]
+[2016/Apr/21|20:03:05] SDTree statistics:
+[2016/Apr/21|20:03:05] Total number of faces stored: 73038
+[2016/Apr/21|20:03:05] Max tree depth: 44
+[2016/Apr/21|20:03:05] Average tree depth: 21.8529
+[2016/Apr/21|20:03:05] Number of tree nodes: 12401
+[2016/Apr/21|20:03:05] Number of tree faces: 136899
+[2016/Apr/21|20:03:05] Number of tree leafs: 5105
+[2016/Apr/21|20:03:05] Average faces/leaf: 26.8167
+[2016/Apr/21|20:03:05] Memory usage: 6.77 MB
+[2016/Apr/21|20:03:05] Building static SD trees took 30 milliseconds
+[2016/Apr/21|20:03:05] Tracing 1000000 image samples for light cache in 64 passes.
+[2016/Apr/21|20:03:05] Bitmap file "cobbles.png" loaded.
+[2016/Apr/21|20:03:05] Building light cache...:  2.27% [ 0h  0m  0.2s] [ 0h  0m  8.6s est][2016/Apr/21|20:03:05] Building light cache...:  5.99% [ 0h  0m  0.4s] [ 0h  0m  6.3s est][2016/Apr/21|20:03:05] Building light cache...: 10.14% [ 0h  0m  0.6s] [ 0h  0m  5.4s est][2016/Apr/21|20:03:05] Building light cache...: 13.37% [ 0h  0m  0.8s] [ 0h  0m  5.2s est][2016/Apr/21|20:03:06] Building light cache...: 17.30% [ 0h  0m  1.0s] [ 0h  0m  4.8s est][2016/Apr/21|20:03:06] Building light cache...: 21.07% [ 0h  0m  1.2s] [ 0h  0m  4.5s est][2016/Apr/21|20:03:06] Building light cache...: 24.75% [ 0h  0m  1.4s] [ 0h  0m  4.3s est][2016/Apr/21|20:03:06] Building light cache...: 28.58% [ 0h  0m  1.6s] [ 0h  0m  4.0s est][2016/Apr/21|20:03:06] Building light cache...: 32.32% [ 0h  0m  1.8s] [ 0h  0m  3.8s est][2016/Apr/21|20:03:07] Building light cache...: 36.13% [ 0h  0m  2.0s] [ 0h  0m  3.6s est][2016/Apr/21|20:03:07] Building light cache...: 39.99% [ 0h  0m  2.2s] [ 0h  0m  3.3s est][2016/Apr/21|20:03:07] Building light cache...: 43.89% [ 0h  0m  2.4s] [ 0h  0m  3.1s est][2016/Apr/21|20:03:07] Building light cache...: 47.51% [ 0h  0m  2.6s] [ 0h  0m  2.9s est][2016/Apr/21|20:03:07] Building light cache...: 51.23% [ 0h  0m  2.8s] [ 0h  0m  2.7s est][2016/Apr/21|20:03:08] Building light cache...: 55.16% [ 0h  0m  3.0s] [ 0h  0m  2.5s est][2016/Apr/21|20:03:08] Building light cache...: 59.05% [ 0h  0m  3.2s] [ 0h  0m  2.2s est][2016/Apr/21|20:03:08] Building light cache...: 62.75% [ 0h  0m  3.4s] [ 0h  0m  2.0s est][2016/Apr/21|20:03:08] Building light cache...: 66.52% [ 0h  0m  3.6s] [ 0h  0m  1.8s est][2016/Apr/21|20:03:08] Building light cache...: 69.87% [ 0h  0m  3.8s] [ 0h  0m  1.7s est][2016/Apr/21|20:03:09] Building light cache...: 73.67% [ 0h  0m  4.0s] [ 0h  0m  1.4s est][2016/Apr/21|20:03:09] Building light cache...: 77.36% [ 0h  0m  4.2s] [ 0h  0m  1.2s est][2016/Apr/21|20:03:09] Building light cache...: 81.16% [ 0h  0m  4.4s] [ 0h  0m  1.0s est][2016/Apr/21|20:03:09] Building light cache...: 84.96% [ 0h  0m  4.6s] [ 0h  0m  0.8s est][2016/Apr/21|20:03:09] Building light cache...: 88.35% [ 0h  0m  4.8s] [ 0h  0m  0.6s est][2016/Apr/21|20:03:10] Building light cache...: 91.79% [ 0h  0m  5.0s] [ 0h  0m  0.4s est][2016/Apr/21|20:03:10] Building light cache...: 95.65% [ 0h  0m  5.2s] [ 0h  0m  0.2s est][2016/Apr/21|20:03:10] Building light cache...: 99.80% [ 0h  0m  5.4s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:10] Building light cache...: done [ 0h  0m  5.4s]
+[2016/Apr/21|20:03:10] Merging light cache passes...: 38.10% [ 0h  0m  0.2s] [ 0h  0m  0.3s est][2016/Apr/21|20:03:10] Merging light cache passes...: 63.49% [ 0h  0m  0.4s] [ 0h  0m  0.2s est][2016/Apr/21|20:03:11] Merging light cache passes...: 88.89% [ 0h  0m  0.6s] [ 0h  0m  0.1s est][2016/Apr/21|20:03:11] Merging light cache passes...: done [ 0h  0m  0.7s]
+[2016/Apr/21|20:03:11] Light cache contains 2952 samples.
+[2016/Apr/21|20:03:11] Light cache takes 5.2 MB.
+[2016/Apr/21|20:03:11] Prefiltering light cache...: done [ 0h  0m  0.0s]
+[2016/Apr/21|20:03:11] Average rays per light cache sample: 238.36 (min 1, max 1187)
+[2016/Apr/21|20:03:11] Prepass 1 of 4...: 39.68% [ 0h  0m  0.2s] [ 0h  0m  0.3s est][2016/Apr/21|20:03:11] Prepass 1 of 4...: 61.01% [ 0h  0m  0.4s] [ 0h  0m  0.3s est][2016/Apr/21|20:03:11] Prepass 1 of 4...: 86.19% [ 0h  0m  0.6s] [ 0h  0m  0.1s est][2016/Apr/21|20:03:12] Prepass 1 of 4...: 97.68% [ 0h  0m  0.8s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:12] Prepass 1 of 4...: 99.64% [ 0h  0m  1.0s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:12] Prepass 1 of 4...: done [ 0h  0m  1.1s]
+[2016/Apr/21|20:03:12] Prepass 2 of 4...: 29.87% [ 0h  0m  0.2s] [ 0h  0m  0.5s est][2016/Apr/21|20:03:12] Prepass 2 of 4...: 44.37% [ 0h  0m  0.4s] [ 0h  0m  0.5s est][2016/Apr/21|20:03:13] Prepass 2 of 4...: 60.16% [ 0h  0m  0.6s] [ 0h  0m  0.4s est][2016/Apr/21|20:03:13] Prepass 2 of 4...: 77.23% [ 0h  0m  0.8s] [ 0h  0m  0.2s est][2016/Apr/21|20:03:13] Prepass 2 of 4...: 96.08% [ 0h  0m  1.0s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:13] Prepass 2 of 4...: 99.12% [ 0h  0m  1.2s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:13] Prepass 2 of 4...: done [ 0h  0m  1.4s]
+[2016/Apr/21|20:03:13] Prepass 3 of 4...: 29.01% [ 0h  0m  0.2s] [ 0h  0m  0.5s est][2016/Apr/21|20:03:14] Prepass 3 of 4...: 40.11% [ 0h  0m  0.4s] [ 0h  0m  0.6s est][2016/Apr/21|20:03:14] Prepass 3 of 4...: 47.79% [ 0h  0m  0.6s] [ 0h  0m  0.7s est][2016/Apr/21|20:03:14] Prepass 3 of 4...: 57.60% [ 0h  0m  0.8s] [ 0h  0m  0.6s est][2016/Apr/21|20:03:14] Prepass 3 of 4...: 68.27% [ 0h  0m  1.0s] [ 0h  0m  0.5s est][2016/Apr/21|20:03:15] Prepass 3 of 4...: 82.77% [ 0h  0m  1.2s] [ 0h  0m  0.3s est][2016/Apr/21|20:03:15] Prepass 3 of 4...: 96.72% [ 0h  0m  1.4s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:15] Prepass 3 of 4...: 99.16% [ 0h  0m  1.6s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:15] Prepass 3 of 4...: done [ 0h  0m  1.8s]
+[2016/Apr/21|20:03:15] Prepass 4 of 4...: 26.45% [ 0h  0m  0.2s] [ 0h  0m  0.6s est][2016/Apr/21|20:03:15] Prepass 4 of 4...: 39.25% [ 0h  0m  0.4s] [ 0h  0m  0.6s est][2016/Apr/21|20:03:16] Prepass 4 of 4...: 45.23% [ 0h  0m  0.6s] [ 0h  0m  0.7s est][2016/Apr/21|20:03:16] Prepass 4 of 4...: 46.93% [ 0h  0m  0.8s] [ 0h  0m  0.9s est][2016/Apr/21|20:03:16] Prepass 4 of 4...: 53.33% [ 0h  0m  1.0s] [ 0h  0m  0.9s est][2016/Apr/21|20:03:16] Prepass 4 of 4...: 55.89% [ 0h  0m  1.2s] [ 0h  0m  1.0s est][2016/Apr/21|20:03:17] Prepass 4 of 4...: 58.88% [ 0h  0m  1.4s] [ 0h  0m  1.0s est][2016/Apr/21|20:03:17] Prepass 4 of 4...: 67.41% [ 0h  0m  1.6s] [ 0h  0m  0.8s est][2016/Apr/21|20:03:17] Prepass 4 of 4...: 75.52% [ 0h  0m  1.8s] [ 0h  0m  0.6s est][2016/Apr/21|20:03:17] Prepass 4 of 4...: 89.60% [ 0h  0m  2.0s] [ 0h  0m  0.2s est][2016/Apr/21|20:03:17] Prepass 4 of 4...: 96.19% [ 0h  0m  2.2s] [ 0h  0m  0.1s est][2016/Apr/21|20:03:18] Prepass 4 of 4...: 99.24% [ 0h  0m  2.4s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:18] Prepass 4 of 4...: done [ 0h  0m  2.6s]
+[2016/Apr/21|20:03:18] Rendering image...:  0.00% [ 0h  0m 10.9s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:18] Rendering image...: 38.40% [ 0h  0m  0.2s] [ 0h  0m  0.3s est][2016/Apr/21|20:03:18] Rendering image...: 49.49% [ 0h  0m  0.4s] [ 0h  0m  0.4s est][2016/Apr/21|20:03:18] Rendering image...: 60.59% [ 0h  0m  0.6s] [ 0h  0m  0.4s est][2016/Apr/21|20:03:19] Rendering image...: 72.11% [ 0h  0m  0.8s] [ 0h  0m  0.3s est][2016/Apr/21|20:03:19] Rendering image...: 87.89% [ 0h  0m  1.0s] [ 0h  0m  0.1s est][2016/Apr/21|20:03:19] Rendering image...: 98.32% [ 0h  0m  1.2s] [ 0h  0m  0.0s est][2016/Apr/21|20:03:19] Rendering image...: done [ 0h  0m  1.4s]
+[2016/Apr/21|20:03:19] Number of raycasts: 9432356 (34.93 per pixel)
+[2016/Apr/21|20:03:19]   Camera rays: 1628297 (6.03 per pixel)
+[2016/Apr/21|20:03:19]   Shadow rays: 2443697 (9.05 per pixel)
+[2016/Apr/21|20:03:19]   GI rays: 5659316 (20.96 per pixel)
+[2016/Apr/21|20:03:19]   Reflection rays: 0 (0.00 per pixel)
+[2016/Apr/21|20:03:19]   Refraction rays: 0 (0.00 per pixel)
+[2016/Apr/21|20:03:19]   Unshaded rays: 0 (0.00 per pixel)
+[2016/Apr/21|20:03:19] Number of light evaluations: 1196105 (4.43 per pixel)
+[2016/Apr/21|20:03:19] Number of intersectable primitives: 73038
+[2016/Apr/21|20:03:19]   SD triangles: 73038
+[2016/Apr/21|20:03:19]   MB triangles: 0
+[2016/Apr/21|20:03:19]   Static primitives: 0
+[2016/Apr/21|20:03:19]   Moving primitives: 0
+[2016/Apr/21|20:03:19]   Infinite primitives: 0
+[2016/Apr/21|20:03:19]   Static hair segments: 0
+[2016/Apr/21|20:03:19]   Moving hair segments: 0
+[2016/Apr/21|20:03:19] Frame took 14.60 s.
+[2016/Apr/21|20:03:19] Bitmap file "cobbles.png" unloaded.
+[2016/Apr/21|20:03:19] Cleaning up bitmap manager
+[2016/Apr/21|20:03:23] Closing log - 0 error(s), 2 warning(s).
+[2016/Apr/21|20:03:23] Issues Report:
+[2016/Apr/21|20:03:23]   Warnings:
+[2016/Apr/21|20:03:23]     Getting library description failed because:
+[2016/Apr/21|20:03:23]       dlsym(0x10118d930, getLibDesc): symbol not found
