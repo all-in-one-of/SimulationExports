@@ -1,4 +1,5 @@
 #include "VRayExporter.h"
+#include "VRayHelperFuncs.h"
 #include <iostream>
 #include <ngl/Mat3.h>
 #include <ngl/Vec3.h>
@@ -63,9 +64,6 @@ void VRayExporter::renderView(const ngl::Mat4 &_tx)
   m_stream<<"Vector("<<-pos.m_x<<","<<-pos.m_y<<","<<pos.m_z<<"));\n";
 
   m_stream<<"}\n";
-  std::cout<<"view\n"<<_tx<<"\n";
-  std::cout<<"view\n"<<t<<"\n";
-  std::cout<<"pos "<<pos<<"\n";
 }
 
 void VRayExporter::setWorldUp(const ngl::Vec3 &_up)
@@ -78,22 +76,26 @@ void VRayExporter::setWorldUp(const ngl::Vec3 &_up)
 
 void VRayExporter::setImageSize(int _w, int _h)
 {
-  m_stream<<"SettingsOutput {\n";
-  m_stream<<"img_width="<<_w<<";\n";
-  m_stream<<"img_height="<<_h<<";\n}\n";
+  StartGroup begin(&m_stream,"SettingsOutput");
+  writePair(m_stream,"img_width",_w);
+  writePair(m_stream,"img_height",_h);
 }
 
 void VRayExporter::setFOV(float _fov)
 {
-// Camera settings
-m_stream<<"SettingsCamera {\n";
-m_stream<<"fov="<<_fov<<";\n}\n";
+  StartGroup cam(&m_stream,"SettingsCamera");
+  writePair(m_stream,"fov",_fov);
 }
 
-void VRayExporter::setBGColour(float _r,float _g, float _b)
+void VRayExporter::setBGColour(float _r, float _g, float _b)
 {
- m_stream<<"SettingsEnvironment {\n";
- m_stream<<"bg_color=Color("<<_r<<","<< _g<<","<<_b<<");\n}\n";
+  setBGColour(ngl::Colour(_r,_g,_b));
+}
+
+void VRayExporter::setBGColour(const ngl::Colour &_c)
+{
+  StartGroup start(&m_stream,"SettingsEnvironment");
+  writePair(m_stream,"bg_color",_c);
 }
 
 void VRayExporter::writeVector(const ngl::Vec3 &_v)
@@ -152,45 +154,20 @@ void VRayExporter::writeStaticMeshWithChannel(const std::string &_name,
 
 {
   m_stream<<"GeomStaticMesh "<<_name <<"{\n";
-  m_stream<<"vertices=ListVector(\n";
-  for(auto v : _verts)
-  {
-    writeVector(v);
-    m_stream<<",\n";
-  }
-  m_stream<<");\n";
-  m_stream<<"faces=ListVector(\n";
-  for(auto f : _faces)
-  {
-    writeVector(f);
-    m_stream<<",\n";
-  }
-  m_stream<<");\n";
+  listVector("vertices",_verts);
+  listVector("faces",_faces);
+  listVector("normals",_normals);
+  listVector("faceNormals",_faceNormals);
 
-  m_stream<<"normals=ListVector(\n";
-  for(auto n : _normals)
-  {
-    writeVector(n);
-    m_stream<<",\n";
-  }
-  m_stream<<");\n";
 
-  m_stream<<"faceNormals=ListVector(\n";
-  for(auto n : _faceNormals)
-  {
-    writeVector(n);
-    m_stream<<",\n";
-  }
-  m_stream<<");\n";
   m_stream<<"map_channels=List(\nList(1,\nList(\n";
   for(auto n : _chan)
   {
     writeVector(n);
     m_stream<<",";
   }
-  // get rid of last ,
-  long pos = m_stream.tellp();
-  m_stream.seekp (pos-1);
+  // get rid of the last comma
+  removeCharFromStream();
   m_stream<<"),\nList(\n";
   for(auto n : _chanIndex)
   {
@@ -198,8 +175,7 @@ void VRayExporter::writeStaticMeshWithChannel(const std::string &_name,
     m_stream<<",";
   }
   // get rid of last ,
-  pos = m_stream.tellp();
-  m_stream.seekp (pos-1);
+  removeCharFromStream();
   m_stream<<")));";
   m_stream<<"}\n";
 }
@@ -261,3 +237,33 @@ void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile
   writeStaticMeshWithChannel(_name,verts,vertIndex,normals,vertIndex,uv,vertIndex);
 }
 
+
+void VRayExporter::includeFile(const std::string &_fname)
+{
+  std::ifstream includeFile(_fname);
+  if (!includeFile.is_open())
+  {
+   std::cerr<<"File not found "<<_fname.c_str()<<"\n";
+   exit(EXIT_FAILURE);
+  }
+  m_stream<<includeFile.rdbuf();
+}
+
+void VRayExporter::removeCharFromStream(long _amount)
+{
+  // get rid of last ,
+  long pos = m_stream.tellp();
+  m_stream.seekp (pos-_amount);
+}
+
+void VRayExporter::listVector(const std::string &_name,const std::vector<ngl::Vec3> &_list)
+{
+  m_stream<<_name<<"=ListVector(\n";
+  for(auto n : _list)
+  {
+    writeVector(n);
+    m_stream<<",\n";
+  }
+  removeCharFromStream(2);
+  m_stream<<");\n";
+}

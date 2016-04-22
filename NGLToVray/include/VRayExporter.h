@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <ngl/Colour.h>
 #include <ngl/Mat4.h>
 
 class VRayExporter
@@ -16,7 +17,9 @@ class VRayExporter
     void setWorldUp(const ngl::Vec3 &_up);
     void setImageSize(int _w, int _h);
     void setFOV(float _fov);
+    void setBGColour(const ngl::Colour &_c);
     void setBGColour(float _r, float _g, float _b);
+
     void writeVector(const ngl::Vec3 &_v);
     void writeStaticMesh(const std::string &_name, const std::vector<ngl::Vec3> &_verts,
                          const std::vector<ngl::Vec3> &_faces,
@@ -36,12 +39,14 @@ class VRayExporter
 
     void writeObj(const std::string &_name, const std::__1::string &_objFile);
 
-
+    void includeFile(const std::string &_fname);
   private :
 
     void mat4ToVrayTransform(const ngl::Mat4 &_m);
     std::ofstream m_stream;
     bool m_isOpen=false;
+    void removeCharFromStream(long _amount=1);
+    void listVector(const std::string &_name, const std::vector<ngl::Vec3> &_list);
 
 };
 

@@ -2,13 +2,13 @@
 #include <ngl/Util.h>
 #include <ngl/NGLStream.h>
 #include <ngl/Transformation.h>
+#include <array>
 void createCube(VRayExporter &_scene);
 
 
 int main()
 {
-
-  char fname[50];
+   char fname[50];
   int frame=0;
   for(int i=0; i<1; i+=10)
   {
@@ -18,119 +18,59 @@ int main()
   std::cout<<"Writing File "<<fname<<'\n';
   VRayExporter scene(fname);
   scene.setWorldUp(ngl::Vec3::up());
-
-  ngl::Mat4 view=ngl::lookAt(ngl::Vec3(0,0.5,3.2),
+/*
+  ngl::Mat4 view=ngl::lookAt(ngl::Vec3(0,5,0),
                              ngl::Vec3(0,0,0),
-                             ngl::Vec3(0,1,0));
+                             ngl::Vec3(1,0,0));
 
   scene.renderView(view);
+  */
+  ngl::Transformation tx;
+  tx.setPosition(0,0,-5);
+  tx.setRotation(0,i,0);
+  scene.renderView(tx.getMatrix());
   scene.setImageSize(600,450);
-  scene.setFOV(ngl::radians(45.0));
-  scene.setBGColour(0.4,0.4,0.4);
-   //std::system("render.sh");
-
-  const std::string lights=R"(
-
-// BRDFDiffuse Box01_brdf {
-//   color=Color(1.0, 0, 0);
-//   transparency=Color(0.0, 0.0, 0.0);
-// }
-
-// LightOmni Omni01 {
-//   color=Color(1,1,1)*100;
-//   transform=Transform(Matrix(Vector(1.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0)), Vector(0, 0, 4));
-// }
-
-   MtlDiffuse Red_brdf {
-    reflection=Color(0.0, 0.0, 0.0);
-     diffuse=Color(1.0, 0.01, 0.01);
-     diffuse_tex=Trollbmp_tex;
-   }
-  MtlDiffuse Blue_brdf {
-    reflection=Color(0.3, 0.3, 0.3);
-     diffuse=Color(1.0, 1.0, 1.0);
-  diffuse_tex=Trollbmp_tex;
-
-      }
-   UVWGenChannel bmp_uvwgen {
-     uvw_channel=1;
-   }
-   BitmapBuffer bmp_buffer {
-     file="cobbles.png";
-     filter_blur=0;
-     filter_type=2;
-   }
-   TexBitmap bmp_tex {
-     bitmap=bmp_buffer;
-     uvwgen=bmp_uvwgen;
-   }
-     BitmapBuffer Trollbmp_buffer {
-       file="TrollColour.png";
-       filter_blur=0;
-       filter_type=2;
-     }
-     TexBitmap Trollbmp_tex {
-       bitmap=Trollbmp_buffer;
-       uvwgen=bmp_uvwgen;
-     }
+  scene.setFOV(ngl::radians(45.0f));
+  scene.setBGColour(ngl::Colour(0.4f,0.4f,0.4f));
+  scene.includeFile("sceneSetup.vrscene");
 
 
-
-   MtlDiffuse Floor_brdf {
-     diffuse=Color(1.0, 1.0, 1.0);
-     diffuse_tex=bmp_tex;
-      }
-   MtlDiffuse Green_brdf {
-    reflection=Color(0.0, 0.0, 0.0);
-     diffuse=Color(0.0, 1.0, 0.01);
-     diffuse_tex=Trollbmp_tex;
-
-      }
-    LightRectangle VRayLight02 {
-     color=Color(30.0, 30.0, 30.0);
-     u_size=30.0;
-     v_size=30.0;
-     subdivs=8;
-     transform=Transform(Matrix(Vector(1.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0)), Vector(16.0, 0.0, 256.0));
-     photonSubdivs=1000;
-     causticSubdivs=1500;
-     storeWithIrradianceMap=0;
-   }
-
-   SettingsGI {
-     on=1;
-     primary_engine=0;
-     primary_multiplier=1.0;
-     secondary_engine=3;
-     secondary_multiplier=1.0;
-     reflect_caustics=0;
-     refract_caustics=0;
-   }
-)";
-
-
-scene.writeRawDataToStream(lights);
 //createCube(scene);
 //scene.writeObj("Helix","Helix.obj");
 scene.writeObj("Troll","troll.obj");
 scene.writeObj("Cube","cube.obj");
-
+scene.includeFile("scenes/teapot.vrscene");
 ngl::Transformation t;
-t.setPosition(-0.5,0,0);
+t.setPosition(-0.5f,-0.4f,0);
 //t.setScale(0.5,1.0,0.5);
 
 t.setRotation(0,25,0);
 scene.writeNode("trollNode","Troll","Red_brdf",t.getMatrix());
-t.setPosition(0.5,0,0);
+t.setPosition(0.5f,-0.4f,0);
 t.setRotation(0,0,0);
 
 scene.writeNode("trollNode2","Troll","Blue_brdf",t.getMatrix());
-t.setPosition(0,-1.0,0);
-t.setScale(20,0.1,20);
-t.setRotation(0,0,0);
+t.setPosition(0.0f,-1.0f,0.0f);
+t.setScale(20.0f,0.1f,20.0f);
+t.setRotation(0.0f,0.0f,0.0f);
 
 scene.writeNode("floor","Cube","Floor_brdf",t.getMatrix());
-
+/*
+int count=0;
+for(float z=5.5; z>0; z-=0.8)
+{
+  for(float x=-2.5; x<2.5; x+=0.8)
+  {
+  t.setPosition(x,-0.8f,-z);
+  t.setScale(0.01f,0.01f,0.01f);
+  t.setRotation(90,0,0);
+  char name[50];
+  std::sprintf(name,"texport%d",count);
+  count++;
+  scene.writeNode(name,"teapot_mesh","Green_brdf",t.getMatrix());
+  }
+}
+*/
 std::cout<<"end frame \n";
   }
 }
