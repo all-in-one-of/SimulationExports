@@ -26,7 +26,7 @@ int main()
   scene.renderView(view);
   */
   ngl::Transformation tx;
-  tx.setPosition(0,0,-5);
+  tx.setPosition(0,0,-2);
   tx.setRotation(0,i,0);
   scene.renderView(tx.getMatrix());
   scene.setImageSize(600,450);
@@ -54,7 +54,7 @@ t.setPosition(0.0f,-1.0f,0.0f);
 t.setScale(20.0f,0.1f,20.0f);
 t.setRotation(0.0f,0.0f,0.0f);
 
-scene.writeNode("floor","Cube","Floor_brdf",t.getMatrix());
+scene.writeNode("floor","Cube","VRayMtlOSL1",t.getMatrix());
 /*
 int count=0;
 for(float z=5.5; z>0; z-=0.8)

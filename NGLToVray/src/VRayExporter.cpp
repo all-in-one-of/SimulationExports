@@ -110,37 +110,10 @@ void VRayExporter::writeStaticMesh(const std::string &_name,
                      const std::vector<ngl::Vec3> &_faceNormals)
 {
   m_stream<<"GeomStaticMesh "<<_name <<"{\n";
-  m_stream<<"vertices=ListVector(\n";
-  for(auto v : _verts)
-  {
-    writeVector(v);
-    m_stream<<",";
-  }
-  m_stream<<");\n";
-  m_stream<<"faces=ListVector(\n";
-  for(auto f : _faces)
-  {
-    writeVector(f);
-    m_stream<<",";
-  }
-  m_stream<<");\n";
-
-  m_stream<<"normals=ListVector(\n";
-  for(auto n : _normals)
-  {
-    writeVector(n);
-    m_stream<<",";
-  }
-  m_stream<<");\n";
-
-  m_stream<<"faceNormals=ListVector(\n";
-  for(auto n : _faceNormals)
-  {
-    writeVector(n);
-    m_stream<<",";
-  }
-  m_stream<<");\n";
-  m_stream<<"map_channels=List(\n);\n";
+  listVector("vertices",_verts);
+  listVector("faces",_faces);
+  listVector("normals",_normals);
+  listVector("faceNormals",_faceNormals);
   m_stream<<"}\n";
 }
 
@@ -203,9 +176,7 @@ void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile
   std::vector<ngl::Vec3> verts;
   std::vector<ngl::Vec3> vertIndex;
   std::vector<ngl::Vec3> normals;
-  std::vector<ngl::Vec3> faceNormals;
   std::vector<ngl::Vec3> uv;
-  std::vector<ngl::Vec3> uvIndex;
   ngl::Obj mesh(_objFile,false);
 
 // get the obj data so we can process it locally
@@ -227,12 +198,8 @@ void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile
       uv.push_back(ouv[f.m_tex[j]]);
     }
     vertIndex.push_back(ngl::Vec3(vIndex,vIndex+1,vIndex+2));
-    //faceNormals.push_back(ngl::Vec3(vIndex,vIndex+1,vIndex+2));
-    //uvIndex.push_back(ngl::Vec3(vIndex,vIndex+1,vIndex+2));
     vIndex+=3;
   }
-
- // writeStaticMesh(_name,verts,vertIndex,normals,vertIndex);
 
   writeStaticMeshWithChannel(_name,verts,vertIndex,normals,vertIndex,uv,vertIndex);
 }
