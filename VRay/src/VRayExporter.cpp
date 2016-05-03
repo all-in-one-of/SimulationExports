@@ -242,21 +242,31 @@ void VRayExporter::listVector(const std::string &_name,const std::vector<ngl::Ve
 void VRayExporter::listColour(const std::string &_name, const std::vector<ngl::Colour> &_list)
 {
   m_stream<<_name<<"=ListColor(\n";
-  for(auto n : _list)
+  for(auto c : _list)
   {
-    writeColour(n);
+    writeColour(c);
     m_stream<<",\n";
   }
   removeCharFromStream(2);
   m_stream<<");\n";
 }
 
-void VRayExporter::writeGeomParticle(const std::string &_name, const std::vector<ngl::Vec3> &_pos, const std::vector<ngl::Colour> &_colours, PointModes _mode)
+void VRayExporter::writeGeomParticle(const std::string &_name, const std::vector<ngl::Vec3> &_pos, const std::vector<ngl::Colour> &_colours, PointModes _mode, ngl::Real _pointSize)
 {
   m_stream<<"GeomParticleSystem "<<_name <<"{\n";
   writePair(m_stream,"render_type",static_cast<int>(_mode )); // default sphere
   listVector("positions",_pos);
   listColour("colors",_colours);
+  int id=0;
+  m_stream<<"ids=ListInt(\n";
+  for(unsigned int i=0; i<_pos.size(); ++i)
+    m_stream<<id++<<",\n";
+  removeCharFromStream();
+  m_stream<<");\n";
+  if(_pointSize !=0.0f)
+  {
+    writePair(m_stream,"point_size",_pointSize);
+  }
   m_stream<<"\n}\n";
 
 }

@@ -43,7 +43,7 @@ class VRayExporter
     void includeFile(const std::string &_fname);
     enum class  PointModes : int {multipoints=3, multistreak=5, points=6, spheres=7, sprites=8,streak=9};
 
-    void writeGeomParticle(const std::string &_name, const std::vector<ngl::Vec3> &_pos, const std::vector<ngl::Colour> &_colours,PointModes _mode=PointModes::spheres);
+    void writeGeomParticle(const std::string &_name, const std::vector<ngl::Vec3> &_pos, const std::vector<ngl::Colour> &_colours, PointModes _mode=PointModes::spheres, ngl::Real _pointSize=0);
 
   private :
 

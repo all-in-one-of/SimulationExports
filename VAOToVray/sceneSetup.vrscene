@@ -1,0 +1,124 @@
+MtlDiffuse Red_brdf
+{
+reflection=Color(0.0, 0.0, 0.0);
+diffuse=Color(1.0, 0.01, 0.01);
+diffuse_tex=Trollbmp_tex;
+}
+
+MtlDiffuse Blue_brdf
+{
+reflection=Color(0.3, 0.3, 0.3);
+diffuse=Color(1.0, 1.0, 1.0);
+diffuse_tex=Trollbmp_tex;
+}
+UVWGenChannel bmp_uvwgen
+{
+uvw_channel=1;
+nsamples=10;
+uvw_transform=Transform(Matrix(Vector(50, 0.0, 0.0), Vector(0.0, 50, 0.0), Vector(0.0, 0.0, 50)), Vector(0, 0, 0));
+
+}
+BitmapBuffer bmp_buffer
+{
+file="cobbles.png";
+filter_blur=0;
+filter_type=2;
+}
+TexBitmap bmp_tex
+{
+bitmap=bmp_buffer;
+uvwgen=bmp_uvwgen;
+}
+BitmapBuffer Trollbmp_buffer
+{
+file="TrollColour.png";
+filter_blur=0;
+filter_type=2;
+}
+TexBitmap Trollbmp_tex
+{
+bitmap=Trollbmp_buffer;
+uvwgen=bmp_uvwgen;
+}
+
+MtlDiffuse Floor_brdf
+{
+diffuse=Color(1.0, 1.0, 1.0);
+diffuse_tex=bmp_tex;
+}
+MtlDiffuse Green_brdf
+{
+reflection=Color(0.2, 0.2, 0.2);
+diffuse=Color(0.0, 1.0, 0.0);
+}
+LightRectangle VRayLight02
+{
+color=Color(30.0, 30.0, 30.0);
+u_size=30.0;
+v_size=30.0;
+subdivs=8;
+transform=Transform(Matrix(Vector(1.0, 0.0, 0.0), Vector(0.0, 0.0, 1.0), Vector(0.0, 1.0, 0.0)), Vector(0.0, 0.0, 256.0));
+photonSubdivs=1000;
+causticSubdivs=1500;
+storeWithIrradianceMap=0;
+}
+
+//SettingsGI
+//{
+//on=1;
+//primary_engine=0;
+//primary_multiplier=1.0;
+//secondary_engine=3;
+//secondary_multiplier=1.0;
+//reflect_caustics=0;
+//refract_caustics=0;
+//}
+
+SettingsGI vraySettingsGI {
+  on=1;
+  refract_caustics=1;
+  reflect_caustics=0;
+  saturation=1;
+  contrast=1;
+  contrast_base=0.5;
+  primary_engine=2;
+  primary_multiplier=1;
+  secondary_engine=3;
+  secondary_multiplier=1;
+  ray_distance_on=0;
+  ray_distance=100;
+  ao_on=0;
+  ao_amount=0.8;
+  ao_radius=10;
+  ao_subdivs=8;
+}
+
+
+SettingsImageSampler vraySettingsImageSampler {
+  type=3;
+  min_shade_rate=6;
+  fixed_subdivs=1;
+  dmc_minSubdivs=1;
+  dmc_maxSubdivs=24;
+  dmc_threshold=0.01;
+  subdivision_minRate=-1;
+  subdivision_maxRate=2;
+  subdivision_jitter=1;
+  subdivision_threshold=0.15;
+  subdivision_edges=1;
+  subdivision_normals=1;
+  subdivision_normals_threshold=0.1;
+  progressive_minSubdivs=1;
+  progressive_maxSubdivs=100;
+  progressive_threshold=0.01;
+  progressive_maxTime=1;
+  progressive_bundleSize=128;
+  progressive_showMask=0;
+  render_mask_mode=0;
+}
+
+FilterLanczos aaFilter {
+  size=2;
+}
+
+
