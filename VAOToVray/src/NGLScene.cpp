@@ -296,7 +296,7 @@ void NGLScene::exportFrame()
   //tx.setRotation(0,0,0);
   scene.renderView(MV);//tx.getMatrix());
   //scene.renderView(tx.getMatrix());
-  scene.setImageSize(600,450);
+  scene.setImageSize(width(),height());
   scene.setFOV(ngl::radians(45.0f));
   scene.setBGColour(ngl::Colour(0.4f,0.4f,0.4f));
   scene.includeFile("sceneSetup.vrscene");

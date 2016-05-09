@@ -28,7 +28,7 @@ def GetAbsoluteFileName(_title,_wildCard,_fileType) :
 			prefix=str(hou.getenv("HIP"))
 		# we have a $JOB so extract the full $JOB path
 		elif file[0] == "$JOB" :
-			prefix=str(hou.getend("JOB"))
+      prefix=str(hou.getenv("JOB"))
 		# nothing so just blank the string
 		else :
 			prefix=str("")

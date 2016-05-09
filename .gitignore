@@ -1,4 +1,5 @@
 *.rib
+*.geo
 *.tiff
 *.png
 *.vrscene
