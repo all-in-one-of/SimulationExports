@@ -9,6 +9,7 @@
 #include <boost/format.hpp>
 #include <array>
 #include <fstream>
+#include <sstream>
 /// @brief ctor
 /// @param _pos the position of the emitter
 /// @param _numParticles the number of particles to create
@@ -173,6 +174,8 @@ void Emitter::exportFrame()
   static int s_frame=0;
   char fname[50];
   std::sprintf(fname,"geo/particle.%03d.geo",s_frame++);
+  // we will use a stringstream as it may be more efficient
+  std::stringstream ss;
   std::ofstream file;
   file.open(fname);
   if (!file.is_open())
@@ -181,37 +184,39 @@ void Emitter::exportFrame()
       exit(EXIT_FAILURE);
   }
   // write header see here http://www.sidefx.com/docs/houdini15.0/io/formats/geo
-  file << "PGEOMETRY V5\n";
-  file << "NPoints " << m_numParticles << " NPrims 1\n";
-  file << "NPointGroups 0 NPrimGroups 1\n";
+  ss << "PGEOMETRY V5\n";
+  ss << "NPoints " << m_numParticles << " NPrims 1\n";
+  ss << "NPointGroups 0 NPrimGroups 1\n";
   // this is hard coded but could be flexible we have 1 attrib which is Colour
-  file << "NPointAttrib 1  NVertexAttrib 0 NPrimAttrib 2 NAttrib 0\n";
+  ss << "NPointAttrib 1  NVertexAttrib 0 NPrimAttrib 2 NAttrib 0\n";
   // now write out our point attrib this case Cd for diffuse colour
-  file <<"PointAttrib \n";
+  ss <<"PointAttrib \n";
   // default the colour to white
-  file <<"Cd 3 float 1 1 1\n";
+  ss <<"Cd 3 float 1 1 1\n";
   // now we write out the particle data in the format
   // x y z 1 (attrib so in this case colour)
   for(unsigned int i=0; i<m_numParticles; ++i)
   {
-    file<<m_particles[i].m_px<<" "<<m_particles[i].m_py<<" "<<m_particles[i].m_pz << " 1 ";
-    file<<"("<<m_particles[i].m_r<<" "<<m_particles[i].m_g<<" "<< m_particles[i].m_b<<")\n";
+    ss<<m_particles[i].m_px<<" "<<m_particles[i].m_py<<" "<<m_particles[i].m_pz << " 1 ";
+    ss<<"("<<m_particles[i].m_r<<" "<<m_particles[i].m_g<<" "<< m_particles[i].m_b<<")\n";
   }
 
   // now write out the index values
-  file<<"PrimitiveAttrib\n";
-  file<<"generator 1 index 1 location1\n";
-  file<<"dopobject 1 index 1 /obj/AutoDopNetwork:1\n";
-  file<<"Part "<<m_numParticles<<" ";
+  ss<<"PrimitiveAttrib\n";
+  ss<<"generator 1 index 1 location1\n";
+  ss<<"dopobject 1 index 1 /obj/AutoDopNetwork:1\n";
+  ss<<"Part "<<m_numParticles<<" ";
   for(size_t i=0; i<m_numParticles; ++i)
-    file<<i<<" ";
-  file<<" [0	0]\n";
-  file<<"box_object1 unordered\n";
-  file<<"1 1\n";
-  file<<"beginExtra\n";
-  file<<"endExtra\n";
-
-
+  {
+    ss<<i<<" ";
+  }
+  ss<<" [0	0]\n";
+  ss<<"box_object1 unordered\n";
+  ss<<"1 1\n";
+  ss<<"beginExtra\n";
+  ss<<"endExtra\n";
+  // dump string stream to disk;
+  file<<ss.rdbuf();
   file.close();
 
 }
