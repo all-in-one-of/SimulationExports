@@ -5,7 +5,7 @@
 #include <vector>
 #include <ngl/Colour.h>
 #include <ngl/Mat4.h>
-#include <ngl/VertexArrayObject.h>
+#include <ngl/AbstractVAO.h>
 
 class VRayExporter
 {
@@ -42,7 +42,7 @@ class VRayExporter
 
     void includeFile(const std::string &_fname);
 
-    void writeVAO(const std::string &_name, ngl::VertexArrayObject *_vao);
+    void writeVAO(const std::string &_name, ngl::AbstractVAO *_vao);
   private :
 
     void mat4ToVrayTransform(const ngl::Mat4 &_m);

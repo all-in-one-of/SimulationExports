@@ -2,7 +2,8 @@
 #include <ngl/Random.h>
 #include <ngl/Transformation.h>
 #include <ngl/ShaderLib.h>
-#include <ngl/VAOPrimitives.h>
+#include <ngl/VAOFactory.h>
+#include <ngl/SimpleVAO.h>
 #include <ngl/Logger.h>
 #include <ngl/NGLStream.h>
 #include <QElapsedTimer>
@@ -25,7 +26,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
 	m_pos=_pos;
   m_particles.reset(  new Particle[_numParticles]);
   m_glparticles.reset( new GLParticle[_numParticles]);
-	m_vao=ngl::VertexArrayObject::createVOA(GL_POINTS);
+  m_vao.reset( ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS));
   float pointOnCircleX= cosf(ngl::radians(m_time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(m_time))*4.0f;
   ngl::Vec3 end(pointOnCircleX,2.0,pointOnCircleZ);
@@ -49,20 +50,17 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
 	m_numParticles=_numParticles;
 	m_vao->bind();
 	// create the VAO and stuff data
-	m_vao->setData(m_numParticles*sizeof(GLParticle),m_glparticles[0].px);
-	m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(GLParticle),0);
-// uv same as above but starts at 0 and is attrib 1 and only u,v so 2
-//m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(GLParticle),3);
-m_vao->setNumIndices(m_numParticles);
-m_vao->unbind();
-log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
+  m_vao->setData(ngl::SimpleVAO::VertexData(m_numParticles*sizeof(GLParticle),m_glparticles[0].px));
+  m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(GLParticle),0);
+  m_vao->setNumIndices(m_numParticles);
+  m_vao->unbind();
+  log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
 
 }
 
 
 Emitter::~Emitter()
 {
-	m_vao->removeVOA();
 }
 
 /// @brief a method to update each of the particles contained in the system
@@ -74,7 +72,7 @@ void Emitter::update()
   log->logMessage("Starting emitter update\n");
 
   m_vao->bind();
-  ngl::Real *glPtr=m_vao->getDataPointer(0);
+  ngl::Real *glPtr=m_vao->mapBuffer();
   unsigned int glIndex=0;
   #pragma omp parallel for
   static float time=0.0;
@@ -119,7 +117,7 @@ void Emitter::update()
     glIndex+=3;
 
   }
-  m_vao->freeDataPointer();
+  m_vao->unmapBuffer();
 
   m_vao->unbind();
 
@@ -144,7 +142,7 @@ void Emitter::draw(const ngl::Mat4 &_rot)
 
 	ngl::Mat4 vp=m_cam->getVPMatrix();
 
-  shader->setUniform("MVP",_rot*vp);
+  shader->setUniform("MVP",vp*_rot);
 
 	m_vao->bind();
 	m_vao->draw();

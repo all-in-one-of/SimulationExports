@@ -42,10 +42,10 @@ CONFIG += console
 !equals(PWD, $${OUT_PWD}){
   copydata.commands = echo "creating destination dirs" ;
   # now make a dir
-  copydata.commands += mkdir -p $$OUT_PWD/shaders ;
+  copydata.commands += mkdir -p $$OUT_PWD/scenes ;
   copydata.commands += echo "copying files" ;
   # then copy the files
-  copydata.commands += $(COPY_DIR) $$PWD/shaders/* $$OUT_PWD/shaders/ ;
+  copydata.commands += $(COPY_DIR) $$PWD/scenes/* $$OUT_PWD/scenes/ ;
   # now make sure the first target is built before copy
   first.depends = $(first) copydata
   export(first.depends)

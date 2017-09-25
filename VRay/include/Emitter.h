@@ -3,7 +3,7 @@
 #include <vector>
 #include <ngl/Camera.h>
 #include <ngl/Vec3.h>
-#include <ngl/VertexArrayObject.h>
+#include <ngl/AbstractVAO.h>
 #include <memory>
 
 #pragma pack(push,1)
@@ -78,7 +78,7 @@ public :
   std::string m_shaderName;
   /// @brief a pointer to the camera used for drawing
   ngl::Camera *m_cam;
-  ngl::VertexArrayObject *m_vao;
+  std::unique_ptr<ngl::AbstractVAO> m_vao;
   float m_time=0.8f;
   bool m_export=false;
   void exportFrame();

@@ -2,8 +2,9 @@
 #include <ngl/Random.h>
 #include <ngl/Transformation.h>
 #include <ngl/ShaderLib.h>
-#include <ngl/VAOPrimitives.h>
 #include <ngl/Logger.h>
+#include <ngl/VAOFactory.h>
+#include <ngl/SimpleVAO.h>
 #include <ngl/NGLStream.h>
 #include <QElapsedTimer>
 #include <ngl/RibExport.h>
@@ -27,13 +28,14 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   m_pos=_pos;
   m_particles.reset(  new Particle[_numParticles]);
   m_glparticles.reset( new GLParticle[_numParticles]);
-  m_vao=ngl::VertexArrayObject::createVOA(GL_POINTS);
+  m_vao.reset( ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS));
+
   float pointOnCircleX= cosf(ngl::radians(m_time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(m_time))*4.0f;
   ngl::Vec3 end(pointOnCircleX,2.0,pointOnCircleZ);
   end=end-m_pos;
 
-  #pragma omp parallel for ordered schedule(dynamic)
+//  #pragma omp parallel for ordered schedule(dynamic)
   for (unsigned int i=0; i< _numParticles; ++i)
   {
     g.px=p.m_px=m_pos.m_x;
@@ -53,36 +55,60 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
     m_glparticles[i]=g;
   }
   m_numParticles=_numParticles;
-  m_vao->bind();
   // create the VAO and stuff data
-  m_vao->setData(m_numParticles*sizeof(GLParticle),m_glparticles[0].px);
+
+  m_vao->bind();
+  // now copy the data
+  m_vao->setData(ngl::SimpleVAO::VertexData(m_numParticles*sizeof(GLParticle),m_glparticles[0].px));
   m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(GLParticle),0);
   m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(GLParticle),3);
   m_vao->setNumIndices(m_numParticles);
   m_vao->unbind();
+
   log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
   /// @note this demo is based on alembic/lib/Alembic/AbcGeom/Tests/PointsTest.cpp
 
   // create an alembic Geometry output archive called particlesOut.abc
+  Alembic::AbcCoreAbstract::MetaData md;
+//  CreateArchiveWithInfo(
+//                  Alembic::AbcCoreOgawa::WriteArchive(), "archiveInfo.abc",
+//                  appWriter, userStr, md );
+//  m_archive.reset(new  AbcG::OArchive(Alembic::AbcCoreOgawa::WriteArchive(),"particlesOut.abc",md) );
+  namespace Abc = Alembic::Abc;
+  using namespace Abc;
+  OArchive archive;
+  std::string appWriter = "ngl Alembic Export";
+  std::string userStr = "Simple Demo of exporting points with alembic";
 
-  m_archive.reset(new  AbcG::OArchive(Alembic::AbcCoreOgawa::WriteArchive(),"particlesOut.abc") );
-
+//  m_archive.reset( CreateArchiveWithInfo(
+//                    Alembic::AbcCoreOgawa::WriteArchive(), "archiveInfo.abc",
+//                    appWriter, userStr, md )) ;
+//
+   m_archive=CreateArchiveWithInfo(
+                             Alembic::AbcCoreOgawa::WriteArchive(), "particlesOut.abc",
+                             appWriter, userStr, md );
   // create time sampling of 24 fps at frame 0 to start
   AbcG::TimeSampling ts(1.0f/24.0f, 0.0f);
   // get the archive top
-  AbcG::OObject topObj( *m_archive.get(), AbcG::kTop );
+  //AbcG::OObject topObj( *m_archive.get(), AbcG::kTop );
+  AbcG::OObject topObj( m_archive, AbcG::kTop );
+
   // then add in our time sampling.
   Alembic::Util::uint32_t tsidx = topObj.getArchive().addTimeSampling(ts);
   // this is our particle outputs to write to each frame
   m_partsOut.reset( new AbcG::OPoints(topObj, "simpleParticles", tsidx) );
   // now add a colour property to the alembic file for out points
-  m_rgbOut.reset(new AbcG::OC4fArrayProperty( m_partsOut->getSchema(), ".colour",false,AbcG::kVertexScope, tsidx ));
+  AbcG::MetaData mdata;
+
+  AbcG::SetGeometryScope( mdata, AbcG::kVaryingScope );
+  AbcG::OPointsSchema &pSchema = m_partsOut->getSchema();
+  std::cout<<"Schema "<<pSchema.getNumSamples()<<" "<<pSchema.valid()<<"\n";
+  m_rgbOut.reset(new AbcG::OC3fArrayProperty( pSchema, "Cd", tsidx ));
 }
 
 
 Emitter::~Emitter()
 {
-  m_vao->removeVOA();
 }
 
 /// @brief a method to update each of the particles contained in the system
@@ -94,9 +120,10 @@ void Emitter::update()
   log->logMessage("Starting emitter update\n");
 
   m_vao->bind();
-  ngl::Real *glPtr=m_vao->getDataPointer(0);
+  ngl::Real *glPtr=m_vao->mapBuffer();
+
   unsigned int glIndex=0;
-  #pragma omp parallel for
+//  #pragma omp parallel for
   static int rot=0;
   static float time=0.0;
   float pointOnCircleX= cosf(ngl::radians(time))*4.0f;
@@ -150,7 +177,7 @@ void Emitter::update()
     glIndex+=6;
 
   }
-  m_vao->freeDataPointer();
+  m_vao->unmapBuffer();
 
   m_vao->unbind();
 
@@ -169,7 +196,7 @@ void Emitter::draw(const ngl::Mat4 &_rot)
 
   ngl::Mat4 vp=m_cam->getVPMatrix();
 
-  shader->setUniform("MVP",_rot*vp);
+  shader->setUniform("MVP",vp*_rot);
 
   m_vao->bind();
   m_vao->draw();
@@ -191,31 +218,40 @@ void Emitter::exportFrame()
   // this is the data we are going to store, alembic uses Imath
   // internally so we convert from ngl
   // this is the array of particle positions for the frame
-  std::vector<Imath::V3f> positions;
+  std::vector<Imath::V3f> positions(m_numParticles);
   // these are the particle id's which are required so use use index no
-  std::vector<Alembic::Util::uint64_t> id;
+  std::vector<Alembic::Util::uint64_t> id(m_numParticles);
   // set this to push back into the array
   Imath::V3f data;
   // colour values
-  Imath::C4f c;
-  std::vector<Imath::C4f> colours;
+  std::vector<Imath::V3f> colours(m_numParticles);
 
+  std::vector<Imath::V3f> velocities(m_numParticles);
+  std::vector< Alembic::Util::float32_t > widths;
+  AbcG::OFloatGeomParam::Sample widthSamp;
+  widthSamp.setScope(Alembic::AbcGeom::kVertexScope);
+  widthSamp.setVals(Alembic::Abc::FloatArraySample(widths));
 
-  for(unsigned int  i=0; i<m_numParticles; ++i)
+  for(size_t  i=0; i<m_numParticles; ++i)
   {
-    positions.push_back(Imath::V3f(m_particles[i].m_px,m_particles[i].m_py,m_particles[i].m_pz));
-    id.push_back(i);
-    colours.push_back(Imath::C4f(m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b,1.0f));
+    positions[i]=Imath::V3f(m_particles[i].m_px,m_particles[i].m_py,m_particles[i].m_pz);
+    id[i]=i;
+    colours[i]=Imath::V3f(m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b);
+    velocities[i]=Imath::V3f(m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b);
   }
   // create as samples we need to do this else we get a most vexing parse
   // https://en.wikipedia.org/wiki/Most_vexing_parse using below
   // psamp(V3fArraySample( positions),UInt64ArraySample(id))
   AbcG::V3fArraySample pos(positions);
   AbcG::UInt64ArraySample ids(id);
-  AbcG::OPointsSchema::Sample psamp( pos,ids );
+  AbcG::OPointsSchema::Sample psamp( pos,ids,velocities );
+  AbcG::OPointsSchema &pSchema = m_partsOut->getSchema();
+  std::cout<<"Schema "<<pSchema.getNumSamples()<<" "<<pSchema.valid()<<"\n";
 
-  m_partsOut->getSchema().set( psamp );
-  AbcG::C4fArraySample colourArray(colours);
+  pSchema.set( psamp );
+  AbcG::V3fArraySample colourArray(colours);
+
+
   m_rgbOut->set(colourArray);
 
 }

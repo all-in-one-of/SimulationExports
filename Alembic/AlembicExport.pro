@@ -9,16 +9,14 @@ linux*:INCLUDEPATH+= /usr/local/alembic-1.5.8/include/
 linux*:LIBS+=-L/usr/local/alembic-1.5.8/lib/static
 
 
-linux*:LIBS+= -lAbcWFObjConvert         -lAlembicAbcCoreOgawa \
--lAlembicAbc              -lAlembicAbcGeom \
--lAlembicAbcCollection   -lAlembicAbcMaterial \
--lAlembicAbcCoreAbstract  -lAlembicAbcOpenGL \
--lAlembicAbcCoreFactory   -lAlembicOgawa \
--lAlembicAbcCoreHDF5      -lAlembicUtil
+linux*:LIBS+= -lAbcWFObjConvert  -lAlembicAbcCoreOgawa \
+-lAlembicAbc  -lAlembicAbcGeom \
+-lAlembicAbcCollection  -lAlembicAbcMaterial \
+-lAlembicAbcCoreAbstract -lAlembicAbcOpenGL \
+-lAlembicAbcCoreFactory  -lAlembicOgawa \
+-lAlembicAbcCoreHDF5  -lAlembicUtil
 
 linux*:LIBS+=-L/usr/local/lib -lHalf
-
-
 
 macx:LIBS+=-lAlembic
 # as I want to support 4.8 and 5 this will set a flag for some of the mac stuff

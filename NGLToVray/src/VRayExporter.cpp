@@ -177,7 +177,7 @@ void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile
   std::vector<ngl::Vec3> vertIndex;
   std::vector<ngl::Vec3> normals;
   std::vector<ngl::Vec3> uv;
-  ngl::Obj mesh(_objFile,false);
+  ngl::Obj mesh(_objFile,ngl::Obj::CalcBB::False);
 
 // get the obj data so we can process it locally
   std::vector <ngl::Vec3> overts=mesh.getVertexList();

@@ -5,7 +5,7 @@
 #include <ngl/Vec3.h>
 #include <ngl/Obj.h>
 #include <ngl/NGLStream.h>
-#include <ngl/VertexArrayObject.h>
+#include <ngl/AbstractVAO.h>
 VRayExporter::VRayExporter(const std::string &_fname)
 {
   open(_fname);
@@ -180,7 +180,7 @@ void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile
   std::vector<ngl::Vec3> faceNormals;
   std::vector<ngl::Vec3> uv;
   std::vector<ngl::Vec3> uvIndex;
-  ngl::Obj mesh(_objFile,false);
+  ngl::Obj mesh(_objFile,ngl::Obj::CalcBB::False);
 
 // get the obj data so we can process it locally
   std::vector <ngl::Vec3> overts=mesh.getVertexList();
@@ -238,16 +238,16 @@ void VRayExporter::listVector(const std::string &_name,const std::vector<ngl::Ve
   m_stream<<");\n";
 }
 
-void VRayExporter::writeVAO(const std::string &_name,ngl::VertexArrayObject *_vao)
+void VRayExporter::writeVAO(const std::string &_name,ngl::AbstractVAO *_vao)
 {
   if(_vao == nullptr)
   {
     std::cerr<<"nullptr for VAO! ";
     std::exit(EXIT_FAILURE);
   }
-  unsigned int size=_vao->getNumIndices();
+  auto size=_vao->numIndices();
   //vertData *ptr=reinterpret_cast<vertData *>( vao->getDataPointer(0));
-  ngl::Real *ptr=_vao->getDataPointer(0);
+  ngl::Real *ptr=_vao->mapBuffer(0);
 
   if(ptr == nullptr)
   {
