@@ -27,7 +27,8 @@ INCLUDEPATH +=./include
 DESTDIR=./
 # add the glsl shader files
 OTHER_FILES+= shaders/*.glsl  \
-							README.md
+              README.md \
+              ribs/*.osl
 # and add the include dir into the search path for Qt and make
 INCLUDEPATH +=./include
 # where our exe is going to live (root of project)

@@ -35,7 +35,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   ngl::Vec3 end(pointOnCircleX,2.0,pointOnCircleZ);
   end=end-m_pos;
 
-//  #pragma omp parallel for ordered schedule(dynamic)
+#pragma omp parallel for ordered schedule(dynamic)
   for (unsigned int i=0; i< _numParticles; ++i)
   {
     g.px=p.m_px=m_pos.m_x;
@@ -123,8 +123,7 @@ void Emitter::update()
   ngl::Real *glPtr=m_vao->mapBuffer();
 
   unsigned int glIndex=0;
-//  #pragma omp parallel for
-  static int rot=0;
+static int rot=0;
   static float time=0.0;
   float pointOnCircleX= cosf(ngl::radians(time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(time))*4.0f;
@@ -133,6 +132,7 @@ void Emitter::update()
   //end.normalize();
   time+=m_time;
 
+  #pragma omp parallel for
   for(unsigned int i=0; i<m_numParticles; ++i)
   {
     m_particles[i].m_currentLife+=0.002f;

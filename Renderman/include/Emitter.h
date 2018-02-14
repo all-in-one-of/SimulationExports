@@ -21,14 +21,23 @@ typedef struct Particle
 	GLfloat m_currentLife;
 	/// @brief gravity
 	GLfloat m_gravity;
+  GLfloat m_r;
+  GLfloat m_g;
+  GLfloat m_b;
+
 }Particle;
 
-typedef struct GLParticle
+struct GLParticle
 {
-	GLfloat px;
-	GLfloat py;
-	GLfloat pz;
-}GLParticle;
+  GLfloat px;
+  GLfloat py;
+  GLfloat pz;
+  GLfloat pr;
+  GLfloat pg;
+  GLfloat pb;
+
+};
+
 
 #pragma pack(pop)
 

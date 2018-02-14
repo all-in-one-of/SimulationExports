@@ -30,7 +30,7 @@ typedef struct Particle
 
 }Particle;
 
-typedef struct GLParticle
+struct GLParticle
 {
 	GLfloat px;
 	GLfloat py;
@@ -39,7 +39,7 @@ typedef struct GLParticle
   GLfloat pg;
   GLfloat pb;
 
-}GLParticle;
+};
 
 #pragma pack(pop)
 
