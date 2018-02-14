@@ -40,9 +40,9 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
     g.py=p.m_py=m_pos.m_y;
     g.pz=p.m_pz=m_pos.m_z;
     ngl::Colour c=rand->getRandomColour();
-    p.m_r=g.pr=1.0f; //c.m_r;
-    p.m_g=g.pg=0.0f; //c.m_g;
-    p.m_b=g.pb=0.0f; //c.m_b;
+    p.m_r=g.pr=c.m_r;
+    p.m_g=g.pg=c.m_g;
+    p.m_b=g.pb=c.m_b;
 
     p.m_dx=end.m_x+rand->randomNumber(2)+0.5f;
     p.m_dy=end.m_y+rand->randomPositiveNumber(10)+0.5f;
@@ -220,7 +220,7 @@ Bxdf "PxrDiffuse" "bxdf" "reference color diffuseColor" ["colourShader:Cout"]
   ribStream<<"\"varying float width\" [";
   for(unsigned int i=0; i<m_numParticles; ++i)
   {
-    ribStream<<"0.01";
+    ribStream<<"0.05 ";
   }
   ribStream<<"]\n";
 
