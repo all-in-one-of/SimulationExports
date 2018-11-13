@@ -1,7 +1,9 @@
 #ifndef VRAYHELPERFUNCS_H_
 #define VRAYHELPERFUNCS_H_
-#include <ngl/Colour.h>
 #include <ngl/Vec3.h>
+#include <ngl/Vec4.h>
+
+#include <fstream>
 #include <ostream>
 #include <utility>
 
@@ -33,7 +35,7 @@ void writePair(std::ofstream &_stream, T _first, S _second)
 
 // specialisation for ngl::Colour
 template<typename T>
-void writePair(std::ofstream &_stream, T _first, const ngl::Colour &_second)
+void writePair(std::ofstream &_stream, T _first, const ngl::Vec4 &_second)
 {
   _stream<<_first<<"=Color("<<_second.m_r<<","<< _second.m_g<<","<<_second.m_b<<");" ;
 }

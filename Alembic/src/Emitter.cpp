@@ -2,7 +2,6 @@
 #include <ngl/Random.h>
 #include <ngl/Transformation.h>
 #include <ngl/ShaderLib.h>
-#include <ngl/Logger.h>
 #include <ngl/VAOFactory.h>
 #include <ngl/SimpleVAO.h>
 #include <ngl/NGLStream.h>
@@ -21,14 +20,13 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   Particle p;
   GLParticle g;
   ngl::Random *rand=ngl::Random::instance();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter ctor\n");
+  ngl::NGLMessage::addMessage("Starting emitter ctor\n");
   QElapsedTimer timer;
   timer.start();
   m_pos=_pos;
   m_particles.reset(  new Particle[_numParticles]);
   m_glparticles.reset( new GLParticle[_numParticles]);
-  m_vao.reset( ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS));
+  m_vao= ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS);
 
   float pointOnCircleX= cosf(ngl::radians(m_time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(m_time))*4.0f;
@@ -41,7 +39,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
     g.px=p.m_px=m_pos.m_x;
     g.py=p.m_py=m_pos.m_y;
     g.pz=p.m_pz=m_pos.m_z;
-    ngl::Colour c=rand->getRandomColour();
+    ngl::Vec3 c=rand->getRandomColour3();
     p.m_r=g.pr=c.m_r;
     p.m_g=g.pg=c.m_g;
     p.m_b=g.pb=c.m_b;
@@ -65,7 +63,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   m_vao->setNumIndices(m_numParticles);
   m_vao->unbind();
 
-  log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished filling array took %d milliseconds\n",timer.elapsed()));
   /// @note this demo is based on alembic/lib/Alembic/AbcGeom/Tests/PointsTest.cpp
 
   // create an alembic Geometry output archive called particlesOut.abc
@@ -116,15 +114,14 @@ void Emitter::update()
 {
   QElapsedTimer timer;
   timer.start();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter update\n");
+  ngl::NGLMessage::addMessage("Starting emitter update\n");
 
   m_vao->bind();
   ngl::Real *glPtr=m_vao->mapBuffer();
 
   unsigned int glIndex=0;
-static int rot=0;
-  static float time=0.0;
+  static int rot=0;
+  static float time=0.0f;
   float pointOnCircleX= cosf(ngl::radians(time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(time))*4.0f;
   ngl::Vec3 end(pointOnCircleX,2.0f,pointOnCircleZ);
@@ -164,7 +161,7 @@ static int rot=0;
       glPtr[glIndex]=m_particles[i].m_px;
       glPtr[glIndex+1]=m_particles[i].m_py;
       glPtr[glIndex+2]=m_particles[i].m_pz;
-      ngl::Colour c=rand->getRandomColour();
+      ngl::Vec3 c=rand->getRandomColour3();
       glPtr[glIndex+3]=c.m_r;
       glPtr[glIndex+4]=c.m_g;
       glPtr[glIndex+5]=c.m_b;
@@ -181,33 +178,29 @@ static int rot=0;
 
   m_vao->unbind();
 
- // log->logMessage("Finished update array took %d milliseconds\n",timer.elapsed());
+ ngl::NGLMessage::addMessage(fmt::format("Finished update array took %d milliseconds\n",timer.elapsed()));
 }
 /// @brief a method to draw all the particles contained in the system
-void Emitter::draw(const ngl::Mat4 &_rot)
+void Emitter::draw(const ngl::Mat4 &_VP, const ngl::Mat4 &_rot)
 {
   QElapsedTimer timer;
   timer.start();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter draw\n");
+  ngl::NGLMessage::addMessage("Starting emitter draw\n");
 
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  shader->use(getShaderName());
-
-  ngl::Mat4 vp=m_cam->getVPMatrix();
-
-  shader->setUniform("MVP",vp*_rot);
+  shader->use("Point");
+  shader->setUniform("MVP",_VP*_rot);
 
   m_vao->bind();
   m_vao->draw();
   m_vao->unbind();
 
-  log->logMessage("Finished draw took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished draw took %d milliseconds\n",timer.elapsed()));
   if(m_export==true)
   {
      timer.restart();
      exportFrame();
-     log->logMessage("Alembic Export took %d milliseconds\n",timer.elapsed());
+     ngl::NGLMessage::addMessage(fmt::format("Alembic Export took %d milliseconds\n",timer.elapsed()));
   }
 }
 

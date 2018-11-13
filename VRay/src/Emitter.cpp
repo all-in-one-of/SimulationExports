@@ -4,10 +4,8 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/VAOFactory.h>
 #include <ngl/SimpleVAO.h>
-#include <ngl/Logger.h>
 #include <ngl/NGLStream.h>
 #include <QElapsedTimer>
-#include <boost/format.hpp>
 #include <array>
 #include "VRayExporter.h"
 
@@ -20,14 +18,13 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   Particle p;
   GLParticle g;
   ngl::Random *rand=ngl::Random::instance();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter ctor\n");
+  ngl::NGLMessage::addMessage("Starting emitter ctor\n");
   QElapsedTimer timer;
   timer.start();
   m_pos=_pos;
   m_particles.reset(  new Particle[_numParticles]);
   m_glparticles.reset( new GLParticle[_numParticles]);
-  m_vao.reset( ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS));
+  m_vao=ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS);
   float pointOnCircleX= cosf(ngl::radians(m_time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(m_time))*4.0f;
   ngl::Vec3 end(pointOnCircleX,2.0,pointOnCircleZ);
@@ -39,7 +36,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
     g.px=p.m_px=m_pos.m_x;
     g.py=p.m_py=m_pos.m_y;
     g.pz=p.m_pz=m_pos.m_z;
-    ngl::Colour c=rand->getRandomColour();
+    ngl::Vec3 c=rand->getRandomColour3();
     p.m_r=g.pr=c.m_r;
     p.m_g=g.pg=c.m_g;
     p.m_b=g.pb=c.m_b;
@@ -60,7 +57,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(GLParticle),3);
   m_vao->setNumIndices(m_numParticles);
   m_vao->unbind();
-  log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished filling array took %d milliseconds\n",timer.elapsed()));
   /// @note this demo is based on alembic/lib/Alembic/AbcGeom/Tests/PointsTest.cpp
 
 }
@@ -75,8 +72,7 @@ void Emitter::update()
 {
   QElapsedTimer timer;
   timer.start();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter update\n");
+  ngl::NGLMessage::addMessage("Starting emitter update\n");
 
   m_vao->bind();
   ngl::Real *glPtr=m_vao->mapBuffer();
@@ -122,7 +118,7 @@ void Emitter::update()
       glPtr[glIndex]=m_particles[i].m_px;
       glPtr[glIndex+1]=m_particles[i].m_py;
       glPtr[glIndex+2]=m_particles[i].m_pz;
-      ngl::Colour c=rand->getRandomColour();
+      ngl::Vec3 c=rand->getRandomColour3();
       glPtr[glIndex+3]=c.m_r;
       glPtr[glIndex+4]=c.m_g;
       glPtr[glIndex+5]=c.m_b;
@@ -142,52 +138,46 @@ void Emitter::update()
  // log->logMessage("Finished update array took %d milliseconds\n",timer.elapsed());
 }
 /// @brief a method to draw all the particles contained in the system
-void Emitter::draw(const ngl::Mat4 &_rot)
+void Emitter::draw(const ngl::Mat4 &_view,const ngl::Mat4 &_project, const ngl::Mat4 &_rot)
 {
   QElapsedTimer timer;
   timer.start();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter draw\n");
+  ngl::NGLMessage::addMessage("Starting emitter draw\n");
 
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  shader->use(getShaderName());
-
-  ngl::Mat4 vp=m_cam->getVPMatrix();
-
-  shader->setUniform("MVP",vp*_rot);
+  ngl::ShaderLib::instance()->setUniform("MVP",_project*_view*_rot);
 
   m_vao->bind();
   m_vao->draw();
   m_vao->unbind();
 
-  log->logMessage("Finished draw took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished draw took %d milliseconds\n",timer.elapsed()));
   if(m_export==true)
   {
      timer.restart();
-     exportFrame();
-     log->logMessage("Alembic Export took %d milliseconds\n",timer.elapsed());
+     exportFrame(_view);
+     ngl::NGLMessage::addMessage(fmt::format("VRay Export took %d milliseconds\n",timer.elapsed()));
   }
 }
 
-void Emitter::exportFrame()
+void Emitter::exportFrame(const ngl::Mat4 &_view)
 {
   static int s_frame=0;
-  char fname[50];
-  std::sprintf(fname,"scenes/particle.%03d.vrscene",s_frame++);
+
+  std::string fname=fmt::format("scenes/particle.%03d.vrscene",s_frame++);
   VRayExporter scene(fname);
   ngl::Transformation t;
   t.setPosition(0,0,-2);
-  scene.renderView(m_cam->getViewMatrix());
+  scene.renderView(_view);
   scene.setImageSize(1024,720);
   scene.setFOV(ngl::radians(45.0f));
-  scene.setBGColour(ngl::Colour(1,1,1));
+  scene.setBGColour(ngl::Vec3(1,1,1));
   scene.includeFile("sceneSetup.vrscene");
   std::vector<ngl::Vec3> positions;
-  std::vector<ngl::Colour> colours;
+  std::vector<ngl::Vec3> colours;
   for(unsigned int i=0; i<m_numParticles; ++i)
   {
     positions.push_back(ngl::Vec3(m_particles[i].m_px,m_particles[i].m_py,m_particles[i].m_pz));
-    colours.push_back(ngl::Colour(1,1,0));//m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b));
+    colours.push_back(ngl::Vec3(1.0f,1.0f,0.0f));//m_particles[i].m_r,m_particles[i].m_g,m_particles[i].m_b));
   }
   scene.writeGeomParticle("particles",positions,colours,VRayExporter::PointModes::points,0);
   ngl::Mat4 scale;

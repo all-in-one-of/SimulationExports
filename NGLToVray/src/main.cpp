@@ -31,7 +31,7 @@ int main()
   scene.renderView(tx.getMatrix());
   scene.setImageSize(600,450);
   scene.setFOV(ngl::radians(45.0f));
-  scene.setBGColour(ngl::Colour(0.4f,0.4f,0.4f));
+  scene.setBGColour(ngl::Vec3(0.4f,0.4f,0.4f));
   scene.includeFile("sceneSetup.vrscene");
 
 

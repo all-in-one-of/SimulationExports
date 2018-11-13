@@ -3,7 +3,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <ngl/Colour.h>
+#include <ngl/Vec3.h>
+#include <ngl/Mat3.h>
 #include <ngl/Mat4.h>
 
 class VRayExporter
@@ -17,9 +18,9 @@ class VRayExporter
     void setWorldUp(const ngl::Vec3 &_up);
     void setImageSize(int _w, int _h);
     void setFOV(float _fov);
-    void setBGColour(const ngl::Colour &_c);
+    void setBGColour(const ngl::Vec3 &_c);
     void setBGColour(float _r, float _g, float _b);
-    void writeColour(const ngl::Colour &_v);
+    void writeColour(const ngl::Vec3 &_v);
 
     void writeVector(const ngl::Vec3 &_v);
     void writeStaticMesh(const std::string &_name, const std::vector<ngl::Vec3> &_verts,
@@ -43,7 +44,7 @@ class VRayExporter
     void includeFile(const std::string &_fname);
     enum class  PointModes : int {multipoints=3, multistreak=5, points=6, spheres=7, sprites=8,streak=9};
 
-    void writeGeomParticle(const std::string &_name, const std::vector<ngl::Vec3> &_pos, const std::vector<ngl::Colour> &_colours, PointModes _mode=PointModes::spheres, ngl::Real _pointSize=0);
+    void writeGeomParticle(const std::string &_name, const std::vector<ngl::Vec3> &_pos, const std::vector<ngl::Vec3> &_colours, PointModes _mode=PointModes::spheres, ngl::Real _pointSize=0);
 
   private :
 
@@ -52,7 +53,7 @@ class VRayExporter
     bool m_isOpen=false;
     void removeCharFromStream(long _amount=1);
     void listVector(const std::string &_name, const std::vector<ngl::Vec3> &_list);
-    void listColour(const std::string &_name, const std::vector<ngl::Colour> &_list);
+    void listColour(const std::string &_name, const std::vector<ngl::Vec3> &_list);
 
 };
 

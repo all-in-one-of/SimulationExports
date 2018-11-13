@@ -1,8 +1,5 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
-#include <ngl/Camera.h>
-#include <ngl/Colour.h>
-#include <ngl/Light.h>
 #include <ngl/Text.h>
 #include <QOpenGLWindow>
 #include <memory>
@@ -43,7 +40,6 @@ class NGLScene : public QOpenGLWindow
     /// @brief this is called everytime we want to draw the scene
     //----------------------------------------------------------------------------------------------------------------------
     void paintGL();
-    void resizeGL(QResizeEvent *_event);
     void resizeGL(int _w, int _h);
 
 private:
@@ -82,7 +78,8 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief Our Camera
     //----------------------------------------------------------------------------------------------------------------------
-    ngl::Camera m_cam;
+    ngl::Mat4 m_view;
+    ngl::Mat4 m_project;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief the model position for mouse movement
     //----------------------------------------------------------------------------------------------------------------------

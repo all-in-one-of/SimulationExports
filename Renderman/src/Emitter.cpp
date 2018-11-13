@@ -4,11 +4,9 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/VAOFactory.h>
 #include <ngl/SimpleVAO.h>
-#include <ngl/Logger.h>
 #include <ngl/NGLStream.h>
 #include <QElapsedTimer>
 #include <ngl/RibExport.h>
-#include <boost/format.hpp>
 #include <array>
 /// @brief ctor
 /// @param _pos the position of the emitter
@@ -19,14 +17,13 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   Particle p;
   GLParticle g;
   ngl::Random *rand=ngl::Random::instance();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter ctor\n");
+  ngl::NGLMessage::addMessage("Starting emitter ctor\n");
   QElapsedTimer timer;
   timer.start();
   m_pos=_pos;
   m_particles.reset(  new Particle[_numParticles]);
   m_glparticles.reset( new GLParticle[_numParticles]);
-  m_vao.reset( ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS));
+  m_vao=ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS);
 
   float pointOnCircleX= cosf(ngl::radians(m_time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(m_time))*4.0f;
@@ -39,7 +36,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
     g.px=p.m_px=m_pos.m_x;
     g.py=p.m_py=m_pos.m_y;
     g.pz=p.m_pz=m_pos.m_z;
-    ngl::Colour c=rand->getRandomColour();
+    ngl::Vec3 c=rand->getRandomColour3();
     p.m_r=g.pr=c.m_r;
     p.m_g=g.pg=c.m_g;
     p.m_b=g.pb=c.m_b;
@@ -63,7 +60,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
   m_vao->setNumIndices(m_numParticles);
   m_vao->unbind();
 
-  log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
+ ngl::NGLMessage::addMessage(fmt::format("Finished filling array took %d milliseconds\n",timer.elapsed()));
 
 }
 
@@ -77,14 +74,13 @@ void Emitter::update()
 {
   QElapsedTimer timer;
   timer.start();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter update\n");
+  ngl::NGLMessage::addMessage("Starting emitter update\n");
 
   m_vao->bind();
   ngl::Real *glPtr=m_vao->mapBuffer();
 
   unsigned int glIndex=0;
-static int rot=0;
+  static int rot=0;
   static float time=0.0;
   float pointOnCircleX= cosf(ngl::radians(time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(time))*4.0f;
@@ -125,7 +121,7 @@ static int rot=0;
       glPtr[glIndex]=m_particles[i].m_px;
       glPtr[glIndex+1]=m_particles[i].m_py;
       glPtr[glIndex+2]=m_particles[i].m_pz;
-      ngl::Colour c=rand->getRandomColour();
+      ngl::Vec3 c=rand->getRandomColour3();
       glPtr[glIndex+3]=c.m_r;
       glPtr[glIndex+4]=c.m_g;
       glPtr[glIndex+5]=c.m_b;
@@ -142,42 +138,38 @@ static int rot=0;
 
   m_vao->unbind();
 
-  log->logMessage("Finished update array took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished update array took %d milliseconds\n",timer.elapsed()));
 }
 /// @brief a method to draw all the particles contained in the system
-void Emitter::draw(const ngl::Mat4 &_rot)
+void Emitter::draw(const ngl::Mat4 &_view, const ngl::Mat4 &_project,const ngl::Mat4 &_rot)
 {
   QElapsedTimer timer;
   timer.start();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter draw\n");
+  ngl::NGLMessage::addMessage("Starting emitter draw\n");
 
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  shader->use(getShaderName());
 
-  ngl::Mat4 vp=m_cam->getVPMatrix();
-
-  shader->setUniform("MVP",vp*_rot);
+  ngl::ShaderLib::instance()->setUniform("MVP",_project*_view*_rot);
 
   m_vao->bind();
   m_vao->draw();
   m_vao->unbind();
 
 
-	log->logMessage("Finished draw took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished draw took %d milliseconds\n",timer.elapsed()));
   if(m_export==true)
   {
      timer.restart();
-     exportRib();
-     log->logMessage("Rib Export took %d milliseconds\n",timer.elapsed());
+     exportRib(_view);
+     ngl::NGLMessage::addMessage(fmt::format("Rib Export took %d milliseconds\n",timer.elapsed()));
   }
 }
 
-void Emitter::exportRib()
+void Emitter::exportRib(const ngl::Mat4 &_view)
 {
   // static frame number for exporting
   static int frame=0;
-  std::string fname =boost::str(boost::format("ribs/particle.%04d.rib") %frame );
+  std::string fname=fmt::format("ribs/particle.%04d.rib",frame );
+
   // create an ngl::RibExport this can work either as a one shot
   // exporter or we can get it to output by setting frame numbers
   // see the source code to see how it works.
@@ -187,21 +179,25 @@ void Emitter::exportRib()
   // as it is a file we can get a reference to it to write too
   std::fstream &ribStream=rib.getStream();
   // this is out file name
-  std::string data=boost::str(boost::format("particle.%04d.tiff") % frame);
+  std::string data=fmt::format("particle.%04d.tiff", frame);
   // note the escaped quotes \" if needed we could use new C++ 11
   // raw string literals instead
   ribStream<<"Display \""<<data<<"\" \"file\" \"rgba\"\n";
   // export the display format again this is user selected
   ribStream<<"Format 1024 720 1\n";
   // projection not we use the ngl::Camera fov
-  ribStream<<"Projection \"perspective\" \"uniform float fov\" ["<<m_cam->getFOV()<<"]\n";
+  ribStream<<"Projection \"perspective\" \"uniform float fov\" [45.0] \n ";
   // call world begin (see Rib export as it covers most of rib)
   rib.WorldBegin();
   // camera will write itself out into the rib steam in the correct
   // format, this metho is in ngl::Camera basically it does
   // Scale 1 1 -1
   // ConcatTransform [ view matrix .OpenGL[] ]
-  m_cam->writeRib(rib);
+  //m_cam->writeRib(rib);
+  ribStream<<"ConcatTransform [" ;
+  for(auto f : _view.m_openGL)
+    ribStream <<f<<' ';
+  ribStream <<"] \n";
   // Now we are dumping the data from our particle system as Points
   // I'm setting the data as Points "vertex point P" [ x y z .....]
 

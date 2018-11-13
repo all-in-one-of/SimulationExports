@@ -78,13 +78,13 @@ int main()
   std::cout<<rib1<<"\n";
   // now to export
   std::cout<<"PointsPolygons [";
-  for(auto i=0; i<data.size()-1; ++i)
+  for(size_t i=0; i<data.size()-1; ++i)
       std::cout<<"4 ";
   std::cout<<"] ";
   // in this case the indices will be 0 1 2 3 2 3 4 5 etc
   std::cout<<"[";
   int index=0;
-  for(auto i=0; i<data.size()-1; ++i)
+  for(size_t i=0; i<data.size()-1; ++i)
   {
     std::cout<<index<<" "<<index+1<<" "<<index+2<<" "<<index+3<<" ";
     ++index;

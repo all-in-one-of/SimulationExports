@@ -3,7 +3,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <ngl/Colour.h>
 #include <ngl/Mat4.h>
 #include <ngl/AbstractVAO.h>
 
@@ -18,7 +17,7 @@ class VRayExporter
     void setWorldUp(const ngl::Vec3 &_up);
     void setImageSize(int _w, int _h);
     void setFOV(float _fov);
-    void setBGColour(const ngl::Colour &_c);
+    void setBGColour(const ngl::Vec3 &_c);
     void setBGColour(float _r, float _g, float _b);
 
     void writeVector(const ngl::Vec3 &_v);

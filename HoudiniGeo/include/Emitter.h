@@ -1,14 +1,14 @@
 #ifndef EMITTER_H_
 #define EMITTER_H_
 #include <vector>
-#include <ngl/Camera.h>
 #include <ngl/Vec3.h>
+#include <ngl/Mat4.h>
 #include <ngl/AbstractVAO.h>
 #include <memory>
 
 #pragma pack(push,1)
 
-typedef struct Particle
+struct Particle
 {
 	/// @brief the curent particle position
 	GLfloat m_px;
@@ -26,7 +26,9 @@ typedef struct Particle
   GLfloat m_g;
   GLfloat m_b;
 
-}Particle;
+};
+#pragma pack(pop)
+#pragma pack(push,1)
 
 typedef struct GLParticle
 {
@@ -56,11 +58,8 @@ public :
 	/// @brief a method to update each of the particles contained in the system
 	void update();
 	/// @brief a method to draw all the particles contained in the system
-	void draw(const ngl::Mat4 &_rot);
+  void draw(const ngl::Mat4 &_VP, const ngl::Mat4 &_rot);
 	~Emitter();
-  void setCam(ngl::Camera *_cam){m_cam=_cam;}
-  void setShaderName(const std::string &_n){m_shaderName=_n;}
-  const std::string getShaderName()const {return m_shaderName;}
   void incTime(float _t){m_time+=_t;}
   void decTime(float _t){m_time-=_t;}
   void toggleExport(){ m_export^=true;}
@@ -77,7 +76,6 @@ public :
   /// @brief the name of the shader to use
   std::string m_shaderName;
   /// @brief a pointer to the camera used for drawing
-  ngl::Camera *m_cam;
   std::unique_ptr<ngl::AbstractVAO> m_vao;
   float m_time=0.8f;
   bool m_export=false;

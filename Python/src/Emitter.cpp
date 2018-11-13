@@ -4,10 +4,8 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/VAOFactory.h>
 #include <ngl/SimpleVAO.h>
-#include <ngl/Logger.h>
 #include <ngl/NGLStream.h>
 #include <QElapsedTimer>
-#include <boost/format.hpp>
 #include <array>
 /// @brief ctor
 /// @param _pos the position of the emitter
@@ -18,14 +16,13 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
 	Particle p;
 	GLParticle g;
 	ngl::Random *rand=ngl::Random::instance();
-	ngl::Logger *log = ngl::Logger::instance();
-	log->logMessage("Starting emitter ctor\n");
+  ngl::NGLMessage::addMessage("Starting emitter ctor\n");
 	QElapsedTimer timer;
 	timer.start();
 	m_pos=_pos;
   m_particles.reset(  new Particle[_numParticles]);
   m_glparticles.reset( new GLParticle[_numParticles]);
-  m_vao.reset( ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS));
+  m_vao= ngl::VAOFactory::createVAO(ngl::simpleVAO,GL_POINTS);
   float pointOnCircleX= cosf(ngl::radians(m_time))*4.0f;
   float pointOnCircleZ= sinf(ngl::radians(m_time))*4.0f;
   ngl::Vec3 end(pointOnCircleX,2.0,pointOnCircleZ);
@@ -55,7 +52,7 @@ Emitter::Emitter(ngl::Vec3 _pos, unsigned int _numParticles, ngl::Vec3 *_wind )
 //m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(GLParticle),3);
 m_vao->setNumIndices(m_numParticles);
 m_vao->unbind();
-log->logMessage("Finished filling array took %d milliseconds\n",timer.elapsed());
+ngl::NGLMessage::addMessage(fmt::format("Finished filling array took %d milliseconds\n",timer.elapsed()));
 m_file.open("particles.out");
 }
 
@@ -70,8 +67,7 @@ void Emitter::update()
 {
   QElapsedTimer timer;
   timer.start();
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Starting emitter update\n");
+  ngl::NGLMessage::addMessage("Starting emitter update\n");
 
   m_vao->bind();
   ngl::Real *glPtr=m_vao->mapBuffer();
@@ -123,39 +119,29 @@ void Emitter::update()
 
   m_vao->unbind();
 
-  log->logMessage("Finished update array took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished update array took %d milliseconds\n",timer.elapsed()));
 }
 /// @brief a method to draw all the particles contained in the system
-void Emitter::draw(const ngl::Mat4 &_rot)
+void Emitter::draw(const ngl::Mat4 &_VP,const ngl::Mat4 &_rot)
 {
 	QElapsedTimer timer;
 	timer.start();
-	ngl::Logger *log = ngl::Logger::instance();
-	log->logMessage("Starting emitter draw\n");
-
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  shader->use(getShaderName());
-
-  ngl::Mat4 MV;
-  ngl::Mat4 MVP;
-  ngl::Mat3 normalMatrix;
-  ngl::Mat4 M;
+  ngl::NGLMessage::addMessage("Starting emitter draw\n");
 
 
-	ngl::Mat4 vp=m_cam->getVPMatrix();
 
-  shader->setUniform("MVP",vp*_rot);
+  ngl::ShaderLib::instance()->setUniform("MVP",_VP*_rot);
 
 	m_vao->bind();
 	m_vao->draw();
 	m_vao->unbind();
 
-	log->logMessage("Finished draw took %d milliseconds\n",timer.elapsed());
+  ngl::NGLMessage::addMessage(fmt::format("Finished draw took %d milliseconds\n",timer.elapsed()));
   if(m_export==true)
   {
      timer.restart();
      exportRib();
-     log->logMessage("Rib Export took %d milliseconds\n",timer.elapsed());
+     ngl::NGLMessage::addMessage(fmt::format("Rib Export took %d milliseconds\n",timer.elapsed()));
   }
 }
 

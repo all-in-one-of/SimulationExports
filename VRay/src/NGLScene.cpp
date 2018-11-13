@@ -1,13 +1,9 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
 #include "NGLScene.h"
-#include <ngl/Camera.h>
-#include <ngl/Light.h>
-#include <ngl/Material.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
-#include <ngl/Logger.h>
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -32,37 +28,26 @@ NGLScene::NGLScene(unsigned int _numParticles)
   m_frames=0;
   m_timer.start();
   m_numParticles=_numParticles;
-  ngl::Logger *log = ngl::Logger::instance();
-  log->logMessage("Testing the logger");
 }
 
 
 NGLScene::~NGLScene()
 {
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
-  ngl::Logger *log = ngl::Logger::instance();
-  log->close();
 }
 
-void NGLScene::resizeGL(QResizeEvent *_event )
-{
-  int w=_event->size().width();
-  int h=_event->size().height();
-  // set the viewport for openGL
-  glViewport(0,0,w,h);
-  // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,static_cast<float>(w)/h,0.05f,350.0f);
 
-}
 
 void NGLScene::resizeGL(int _w, int _h)
 {
   // set the viewport for openGL
   glViewport(0,0,_w,_h);
   // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,static_cast<float>(_w)/_h,0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,static_cast<float>(_w)/_h,0.05f,350.0f);
 
 }
+
+constexpr auto PointShader="Point";
 
 void NGLScene::initializeGL()
 {
@@ -81,41 +66,19 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,5,18);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  m_cam.set(from,to,up);
+  m_view=ngl::lookAt(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(40.0f,720.0f/576.0f,0.5f,150.0f);
+  m_project=ngl::perspective(40.0f,720.0f/576.0f,0.5f,150.0f);
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  constexpr auto Point="Point";
-  constexpr auto PointVertex="PointVertex";
-  constexpr auto PointFragment="PointFragment";
-
-  // we are creating a shader called Phong
-  shader->createShaderProgram(Point);
-  // now we are going to create empty shaders for Frag and Vert
-  shader->attachShader(PointVertex,ngl::ShaderType::VERTEX);
-  shader->attachShader(PointFragment,ngl::ShaderType::FRAGMENT);
-  // attach the source
-  shader->loadShaderSource(PointVertex,"shaders/PointVertex.glsl");
-  shader->loadShaderSource(PointFragment,"shaders/PointFragment.glsl");
-  // compile the shaders
-  shader->compileShader(PointVertex);
-  shader->compileShader(PointFragment);
-  // add them to the program
-  shader->attachShaderToProgram(Point,PointVertex);
-  shader->attachShaderToProgram(Point,PointFragment);
-  // now we have associated this data we can link the shader
-  shader->linkProgramObject(Point);
+  shader->loadShader(PointShader,"shaders/PointVertex.glsl","shaders/PointFragment.glsl");
   // and make it active ready to load values
-  (*shader)["Point"]->use();
+  (*shader)[PointShader]->use();
 
   m_wind.set(1,1,1);
   m_emitter.reset( new Emitter(ngl::Vec3(0,0,0),m_numParticles,&m_wind));
-  m_emitter->setCam(&m_cam);
-  m_emitter->setShaderName("Point");
-
   m_text.reset(new ngl::Text(QFont("Arial",14)));
   m_text->setScreenSize(width(),height());
   // as re-size is not explicitly called we need to do this.
@@ -147,8 +110,8 @@ void NGLScene::paintGL()
    mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
 
 
-
-  m_emitter->draw(mouseGlobalTX);
+  ngl::ShaderLib::instance()->use(PointShader);
+  m_emitter->draw(m_view,m_project,mouseGlobalTX);
   m_text->setColour(1,1,1);
   QString text=QString("Wind Vector  %1 %2 %3").arg(m_wind.m_x).arg(m_wind.m_y).arg(m_wind.m_z);
   m_text->renderText(10,20,text);

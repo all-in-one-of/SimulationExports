@@ -2,9 +2,6 @@
 #include <QGuiApplication>
 
 #include "NGLScene.h"
-#include <ngl/Camera.h>
-#include <ngl/Light.h>
-#include <ngl/Material.h>
 #include <ngl/NGLInit.h>
 #include <ngl/Transformation.h>
 #include <ngl/VAOPrimitives.h>
@@ -35,17 +32,10 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
-  m_width=static_cast<int>(_event->size().width()*devicePixelRatio());
-  m_height=static_cast<int>(_event->size().height()*devicePixelRatio());
-  // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,static_cast<float>(width())/height(),0.05f,350.0f);
-}
 
 void NGLScene::resizeGL(int _w , int _h)
 {
-  m_cam.setShape(45.0f,static_cast<float>(_w)/_h,0.05f,350.0f);
+  m_project=ngl::perspective(45.0f,static_cast<float>(_w)/_h,0.05f,350.0f);
   m_width=static_cast<int>(_w*devicePixelRatio());
   m_height=static_cast<int>(_h*devicePixelRatio());
 }
@@ -59,63 +49,51 @@ void NGLScene::initializeGL()
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
   glEnable(GL_DEPTH_TEST);
-  // enable multisampling for smoother drawing
-#ifndef USINGIOS_
-  glEnable(GL_MULTISAMPLE);
-#endif
-   // now to load the shader and set the values
+  // now to load the shader and set the values
+  // grab an instance of shader manager
+  // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  // we are creating a shader called Phong to save typos
-  // in the code create some constexpr
-  constexpr auto shaderProgram="Phong";
-  constexpr auto vertexShader="PhongVertex";
-  constexpr auto fragShader="PhongFragment";
-  // create the shader program
-  shader->createShaderProgram(shaderProgram);
-  // now we are going to create empty shaders for Frag and Vert
-  shader->attachShader(vertexShader,ngl::ShaderType::VERTEX);
-  shader->attachShader(fragShader,ngl::ShaderType::FRAGMENT);
-  // attach the source
-  shader->loadShaderSource(vertexShader,"shaders/PhongVertex.glsl");
-  shader->loadShaderSource(fragShader,"shaders/PhongFragment.glsl");
-  // compile the shaders
-  shader->compileShader(vertexShader);
-  shader->compileShader(fragShader);
-  // add them to the program
-  shader->attachShaderToProgram(shaderProgram,vertexShader);
-  shader->attachShaderToProgram(shaderProgram,fragShader);
-
-
-  // now we have associated that data we can link the shader
-  shader->linkProgramObject(shaderProgram);
-  // and make it active ready to load values
-  (*shader)[shaderProgram]->use();
-  // the shader will use the currently active material and light0 so set them
-  ngl::Material m(ngl::STDMAT::GOLD);
-  // load our material values to the shader into the structure material (see Vertex shader)
-  m.loadToShader("material");
-  // Now we will create a basic Camera from the graphics library
+  // Now we will create a basic Camera
   // This is a static camera so it only needs to be set once
   // First create Values for the camera position
-  ngl::Vec3 from(0,2,8);
+  ngl::Vec3 from(20,20,35);
   ngl::Vec3 to(0,0,0);
   ngl::Vec3 up(0,1,0);
-  // now load to our new camera
-  m_cam.set(from,to,up);
-  // set the shape using FOV 45 Aspect Ratio based on Width and Height
-  // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(45.0f,720.0f/576.0f,0.05f,350.0f);
-  shader->setUniform("viewerPos",m_cam.getEye().toVec3());
-  // now create our light that is done after the camera so we can pass the
-  // transpose of the projection matrix to the light to do correct eye space
-  // transformations
-  ngl::Mat4 iv=m_cam.getViewMatrix();
-  iv.transpose();
-  ngl::Light light(ngl::Vec3(-2,5,2),ngl::Colour(1,1,1,1),ngl::Colour(1,1,1,1),ngl::LightModes::POINTLIGHT );
-  light.setTransform(iv);
-  // load these values to the shader as well
-  light.loadToShader("light");
+  m_view=ngl::lookAt(from,to,up);
+  m_project=ngl::perspective(45,720.0f/576.0f,0.5f,150);
+
+  // we are creating a shader called Phong
+  shader->createShaderProgram("Phong");
+  // now we are going to create empty shaders for Frag and Vert
+  shader->attachShader("PhongVertex",ngl::ShaderType::VERTEX);
+  shader->attachShader("PhongFragment",ngl::ShaderType::FRAGMENT);
+  // attach the source
+  shader->loadShaderSource("PhongVertex","shaders/PhongVertex.glsl");
+  shader->loadShaderSource("PhongFragment","shaders/PhongFragment.glsl");
+  // compile the shaders
+  shader->compileShader("PhongVertex");
+  shader->compileShader("PhongFragment");
+  // add them to the program
+  shader->attachShaderToProgram("Phong","PhongVertex");
+  shader->attachShaderToProgram("Phong","PhongFragment");
+
+  // now we have associated this data we can link the shader
+  shader->linkProgramObject("Phong");
+  // and make it active ready to load values
+  (*shader)["Phong"]->use();
+  ngl::Vec4 lightPos(-2.0f,5.0f,2.0f,0.0f);
+  shader->setUniform("light.position",lightPos);
+  shader->setUniform("light.ambient",0.0f,0.0f,0.0f,1.0f);
+  shader->setUniform("light.diffuse",1.0f,1.0f,1.0f,1.0f);
+  shader->setUniform("light.specular",0.8f,0.8f,0.8f,1.0f);
+  // gold like phong material
+  shader->setUniform("material.ambient",0.274725f,0.1995f,0.0745f,0.0f);
+  shader->setUniform("material.diffuse",0.75164f,0.60648f,0.22648f,0.0f);
+  shader->setUniform("material.specular",0.628281f,0.555802f,0.3666065f,0.0f);
+  shader->setUniform("material.shininess",51.2f);
+  shader->setUniform("viewerPos",from);
+
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
   prim->createSphere("sphere",0.5f,50);
 
@@ -139,8 +117,8 @@ void NGLScene::loadMatricesToShader()
   ngl::Mat3 normalMatrix;
   ngl::Mat4 M;
   M=m_mouseGlobalTX*m_transform.getMatrix();
-  MV=  m_cam.getViewMatrix()*M;
-  MVP=  m_cam.getProjectionMatrix()*MV;
+  MV=  m_view*M;
+  MVP=  m_project*MV;
   normalMatrix=MV;
   normalMatrix.inverse().transpose();
   shader->setUniform("MV",MV);
@@ -288,7 +266,7 @@ void NGLScene::exportFrame()
 
 
   VRayExporter scene("scenes/test.vrscene");
-  ngl::Mat4 MV=m_mouseGlobalTX*m_cam.getViewMatrix();
+  ngl::Mat4 MV=m_view*m_mouseGlobalTX;
  // ngl::Mat4 tx;
 //  tx.translate(0,2,2);
   ngl::Transformation tx;
@@ -298,7 +276,7 @@ void NGLScene::exportFrame()
   //scene.renderView(tx.getMatrix());
   scene.setImageSize(width(),height());
   scene.setFOV(ngl::radians(45.0f));
-  scene.setBGColour(ngl::Colour(0.4f,0.4f,0.4f));
+  scene.setBGColour(ngl::Vec3(0.4f,0.4f,0.4f));
   scene.includeFile("sceneSetup.vrscene");
   ngl::Transformation t;
   //t.setPosition(0.0f,-1.0f,0.0f);

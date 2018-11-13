@@ -89,10 +89,10 @@ void VRayExporter::setFOV(float _fov)
 
 void VRayExporter::setBGColour(float _r, float _g, float _b)
 {
-  setBGColour(ngl::Colour(_r,_g,_b));
+  setBGColour(ngl::Vec3(_r,_g,_b));
 }
 
-void VRayExporter::setBGColour(const ngl::Colour &_c)
+void VRayExporter::setBGColour(const ngl::Vec3 &_c)
 {
   StartGroup start(&m_stream,"SettingsEnvironment");
   writePair(m_stream,"bg_color",_c);
@@ -183,7 +183,7 @@ void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile
   std::vector <ngl::Vec3> overts=mesh.getVertexList();
   std::vector <ngl::Face> ofaces=mesh.getFaceList();
   std::vector <ngl::Vec3> onormals=mesh.getNormalList();
-  std::vector <ngl::Vec3> ouv=mesh.getTextureCordList();
+  std::vector <ngl::Vec3> ouv=mesh.getUVList();
 
   int vIndex=0;
 
@@ -195,7 +195,7 @@ void VRayExporter::writeObj(const std::string &_name,const std::string &_objFile
     {
       verts.push_back(overts[f.m_vert[j]]);
       normals.push_back(onormals[f.m_norm[j]]);
-      uv.push_back(ouv[f.m_tex[j]]);
+      uv.push_back(ouv[f.m_uv[j]]);
     }
     vertIndex.push_back(ngl::Vec3(vIndex,vIndex+1,vIndex+2));
     vIndex+=3;
