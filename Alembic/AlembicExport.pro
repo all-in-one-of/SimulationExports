@@ -4,21 +4,13 @@ TARGET=AlembicExport
 OBJECTS_DIR=obj
 # core Qt Libs to use add more here if needed.
 QT+=gui opengl core
-#linux*:INCLUDEPATH+=/public/devel/include/
-linux*:INCLUDEPATH+= /usr/local/alembic-1.5.8/include/
-linux*:LIBS+=-L/usr/local/alembic-1.5.8/lib/static
+linux*:INCLUDEPATH+=/public/devel/2018/include/OpenEXR/
 
 
-linux*:LIBS+= -lAbcWFObjConvert  -lAlembicAbcCoreOgawa \
--lAlembicAbc  -lAlembicAbcGeom \
--lAlembicAbcCollection  -lAlembicAbcMaterial \
--lAlembicAbcCoreAbstract -lAlembicAbcOpenGL \
--lAlembicAbcCoreFactory  -lAlembicOgawa \
--lAlembicAbcCoreHDF5  -lAlembicUtil
 
 linux*:LIBS+=-L/usr/local/lib -lHalf
 
-macx:LIBS+=-lAlembic
+LIBS+=-lAlembic
 # as I want to support 4.8 and 5 this will set a flag for some of the mac stuff
 # mainly in the types.h file for the setMacVisual which is native in Qt5
 isEqual(QT_MAJOR_VERSION, 5) {
