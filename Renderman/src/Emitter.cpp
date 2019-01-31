@@ -168,7 +168,7 @@ void Emitter::exportRib(const ngl::Mat4 &_view)
 {
   // static frame number for exporting
   static int frame=0;
-  std::string fname=fmt::format("ribs/particle.%04d.rib",frame );
+  std::string fname=fmt::format("ribs/particle.{0:04}.rib",frame );
 
   // create an ngl::RibExport this can work either as a one shot
   // exporter or we can get it to output by setting frame numbers
@@ -179,7 +179,7 @@ void Emitter::exportRib(const ngl::Mat4 &_view)
   // as it is a file we can get a reference to it to write too
   std::fstream &ribStream=rib.getStream();
   // this is out file name
-  std::string data=fmt::format("particle.%04d.tiff", frame);
+  std::string data=fmt::format("particle.{0:04}.tiff", frame);
   // note the escaped quotes \" if needed we could use new C++ 11
   // raw string literals instead
   ribStream<<"Display \""<<data<<"\" \"file\" \"rgba\"\n";
@@ -194,6 +194,7 @@ void Emitter::exportRib(const ngl::Mat4 &_view)
   // Scale 1 1 -1
   // ConcatTransform [ view matrix .OpenGL[] ]
   //m_cam->writeRib(rib);
+  ribStream<<"Scale 1 1 -1\n";
   ribStream<<"ConcatTransform [" ;
   for(auto f : _view.m_openGL)
     ribStream <<f<<' ';
@@ -206,7 +207,7 @@ Pattern "colour" "colourShader"
 Bxdf "PxrDiffuse" "bxdf" "reference color diffuseColor" ["colourShader:Cout"]
               )";
 
-  ribStream<<"Points \"vertex point P\" [";
+  ribStream<<"\nPoints \"vertex point P\" [";
   for(unsigned int i=0; i<m_numParticles; ++i)
   {
     ribStream<<m_particles[i].m_px<<" "<<m_particles[i].m_py<<" "<<m_particles[i].m_pz<<" ";
